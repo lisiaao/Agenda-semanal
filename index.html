@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda Semanal</title>
     <style>
-        /* Variáveis CSS que serão alteradas dinamicamente */
+        /* Variáveis CSS dinâmicas */
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #34495e;
@@ -23,31 +23,22 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         /* --- Tela de Inicialização --- */
         #loader {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            top: 0; left: 0; width: 100vw; height: 100vh;
             background-color: var(--primary-color);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            color: white;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 9999; color: white;
             transition: opacity 0.8s ease-out;
         }
         .spinner {
-            width: 50px;
-            height: 50px;
+            width: 50px; height: 50px;
             border: 5px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
+            border-top-color: white; border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 20px;
         }
@@ -55,50 +46,28 @@
 
         /* --- Layout Principal --- */
         #app {
-            display: none;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            opacity: 0;
-            animation: fadeIn 1s forwards;
+            display: none; max-width: 1200px; margin: 0 auto; padding: 20px;
+            opacity: 0; animation: fadeIn 1s forwards;
         }
         @keyframes fadeIn { to { opacity: 1; } }
 
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px; background: white; border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;
         }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .brand { display: flex; align-items: center; gap: 20px; }
         .brand img {
-            max-height: 60px;
-            border-radius: 8px;
-            display: none; /* Mostra só se tiver URL */
+            max-height: 120px; /* LOGO MAIOR AQUI */
+            border-radius: 8px; display: none; object-fit: contain;
         }
-        .brand h1 {
-            color: var(--primary-color);
-            font-size: 1.8rem;
-        }
+        .brand h1 { color: var(--primary-color); font-size: 2rem; }
 
         .controls button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-left: 10px;
-            font-weight: bold;
+            background-color: var(--primary-color); color: white;
+            border: none; padding: 10px 15px; border-radius: 6px;
+            cursor: pointer; margin-left: 10px; font-weight: bold;
             transition: opacity 0.2s;
         }
         .controls button:hover { opacity: 0.8; }
@@ -108,91 +77,81 @@
         .view-container.active { display: block; animation: fadeIn 0.5s; }
 
         /* Visualização de Lista */
-        .event-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+        .event-list { display: flex; flex-direction: column; gap: 15px; }
         .event-card {
-            background: white;
-            padding: 20px;
-            border-left: 5px solid var(--secondary-color);
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: white; padding: 20px; border-left: 5px solid var(--secondary-color);
+            border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column; gap: 10px;
+            transition: all 0.3s ease;
         }
-        .event-details h3 { color: var(--primary-color); margin-bottom: 5px; }
-        .event-details p { color: #666; font-size: 0.9rem; }
         
-        .delete-btn {
-            background-color: #e74c3c !important;
-            padding: 8px 12px !important;
+        .event-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .event-details h3 { color: var(--primary-color); margin-bottom: 5px; font-size: 1.3rem; }
+        .event-details p { color: #666; font-size: 0.95rem; line-height: 1.4; }
+        
+        .event-image {
+            max-width: 100%; max-height: 350px; object-fit: cover;
+            border-radius: 8px; margin-top: 10px; border: 1px solid #eee;
         }
+
+        .event-actions {
+            display: flex; gap: 10px; align-items: center; margin-top: 10px;
+            padding-top: 10px; border-top: 1px solid #eee;
+        }
+
+        .status-select {
+            padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;
+            outline: none; cursor: pointer;
+        }
+
+        .delete-btn { background-color: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;}
+        .delete-btn:hover { opacity: 0.8; }
+
+        /* Estilos de Status */
+        .status-passed { opacity: 0.6; filter: grayscale(80%); border-left-color: #95a5a6; }
+        .status-passed h3 { color: #7f8c8d; }
+        
+        .status-canceled { border-left-color: #e74c3c; background-color: #fdf5f5; }
+        .status-canceled h3 { text-decoration: line-through; color: #e74c3c; }
+        .badge-canceled { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-left: 10px; text-decoration: none !important; display: inline-block;}
 
         /* Visualização de Calendário */
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 15px;
-        }
-        .day-column {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            min-height: 300px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .day-header {
-            text-align: center;
-            font-weight: bold;
-            color: white;
-            background: var(--primary-color);
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-        }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 15px; }
+        .day-column { background: white; border-radius: 8px; padding: 15px; min-height: 300px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .day-header { text-align: center; font-weight: bold; color: white; background: var(--primary-color); padding: 10px; border-radius: 6px; margin-bottom: 15px; }
+        
         .cal-event {
-            background: var(--bg-color);
-            border-left: 3px solid var(--secondary-color);
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            font-size: 0.85rem;
+            background: var(--bg-color); border-left: 3px solid var(--secondary-color);
+            padding: 10px; margin-bottom: 10px; border-radius: 4px; font-size: 0.85rem;
         }
+        .cal-event img { width: 100%; border-radius: 4px; margin-top: 5px; }
 
-        /* --- Modais (Formulários) --- */
+        /* --- Modais --- */
         .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;
         }
         .modal {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
+            background: white; padding: 30px; border-radius: 12px;
+            width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
         .modal h2 { margin-bottom: 20px; color: var(--primary-color); }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
         .form-group input, .form-group select, .form-group textarea {
             width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;
         }
+        .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        .btn-cancel { background-color: #95a5a6 !important; }
-        .btn-save { background-color: var(--primary-color); color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
+        .btn-cancel { background-color: #95a5a6; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
+        .btn-save { background-color: var(--primary-color); color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;}
 
         @media (max-width: 768px) {
             .calendar-grid { grid-template-columns: 1fr; }
             header { flex-direction: column; gap: 15px; text-align: center; }
+            .brand { flex-direction: column; }
             .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
             .controls button { margin: 0; }
         }
@@ -253,16 +212,28 @@
                 <label>URL da Logo (Link da imagem)</label>
                 <input type="text" id="set-logo" placeholder="https://link-da-sua-imagem.com/logo.png">
             </div>
-            <div class="form-group">
-                <label>Cor Principal</label>
-                <input type="color" id="set-color-1">
+            
+            <div class="color-grid">
+                <div class="form-group">
+                    <label>Cor Principal</label>
+                    <input type="color" id="set-color-1">
+                </div>
+                <div class="form-group">
+                    <label>Cor Secundária</label>
+                    <input type="color" id="set-color-2">
+                </div>
+                <div class="form-group">
+                    <label>Cor de Fundo</label>
+                    <input type="color" id="set-bg">
+                </div>
+                <div class="form-group">
+                    <label>Cor do Texto</label>
+                    <input type="color" id="set-text">
+                </div>
             </div>
-            <div class="form-group">
-                <label>Cor Secundária</label>
-                <input type="color" id="set-color-2">
-            </div>
+
             <div class="modal-actions">
-                <button class="btn-save btn-cancel" onclick="closeModal('settings-modal')">Cancelar</button>
+                <button class="btn-cancel" onclick="closeModal('settings-modal')">Cancelar</button>
                 <button class="btn-save" onclick="saveSettings()">Salvar Configurações</button>
             </div>
         </div>
@@ -294,10 +265,14 @@
             </div>
             <div class="form-group">
                 <label>Descrição (Opcional)</label>
-                <textarea id="ev-desc" rows="3"></textarea>
+                <textarea id="ev-desc" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+                <label>URL do Cartaz/Foto (Opcional)</label>
+                <input type="text" id="ev-image" placeholder="https://link-da-foto.com/cartaz.jpg">
             </div>
             <div class="modal-actions">
-                <button class="btn-save btn-cancel" onclick="closeModal('event-modal')">Cancelar</button>
+                <button class="btn-cancel" onclick="closeModal('event-modal')">Cancelar</button>
                 <button class="btn-save" onclick="saveEvent()">Salvar Evento</button>
             </div>
         </div>
@@ -309,15 +284,15 @@
             name: "Minha Igreja",
             logo: "",
             primaryColor: "#2c3e50",
-            secondaryColor: "#34495e"
+            secondaryColor: "#34495e",
+            bgColor: "#f5f6fa",
+            textColor: "#333333"
         };
 
-        // Estado da Aplicação
         let appSettings = JSON.parse(localStorage.getItem('agendaSettings')) || defaultSettings;
         let appEvents = JSON.parse(localStorage.getItem('agendaEvents')) || [];
-        let currentView = 'list'; // 'list' ou 'calendar'
+        let currentView = 'list';
 
-        // Inicialização
         window.onload = () => {
             setTimeout(() => {
                 document.getElementById('loader').style.opacity = '0';
@@ -327,13 +302,14 @@
                     applySettings();
                     renderEvents();
                 }, 800);
-            }, 1500); // Tempo da animação legalzinha
+            }, 1000);
         };
 
-        // Aplica cores, logo e nome
         function applySettings() {
             document.documentElement.style.setProperty('--primary-color', appSettings.primaryColor);
             document.documentElement.style.setProperty('--secondary-color', appSettings.secondaryColor);
+            document.documentElement.style.setProperty('--bg-color', appSettings.bgColor);
+            document.documentElement.style.setProperty('--text-color', appSettings.textColor);
             
             document.getElementById('display-name').innerText = appSettings.name;
             document.getElementById('loader-text').innerText = appSettings.name;
@@ -346,34 +322,37 @@
                 logoEl.style.display = 'none';
             }
 
-            // Preenche os campos do modal de configurações
             document.getElementById('set-name').value = appSettings.name;
             document.getElementById('set-logo').value = appSettings.logo;
             document.getElementById('set-color-1').value = appSettings.primaryColor;
             document.getElementById('set-color-2').value = appSettings.secondaryColor;
+            document.getElementById('set-bg').value = appSettings.bgColor || '#f5f6fa';
+            document.getElementById('set-text').value = appSettings.textColor || '#333333';
         }
 
-        // Salvar Configurações
         function saveSettings() {
             appSettings = {
                 name: document.getElementById('set-name').value || "Minha Igreja",
                 logo: document.getElementById('set-logo').value,
                 primaryColor: document.getElementById('set-color-1').value,
-                secondaryColor: document.getElementById('set-color-2').value
+                secondaryColor: document.getElementById('set-color-2').value,
+                bgColor: document.getElementById('set-bg').value,
+                textColor: document.getElementById('set-text').value
             };
             localStorage.setItem('agendaSettings', JSON.stringify(appSettings));
             applySettings();
             closeModal('settings-modal');
         }
 
-        // Gerenciar Eventos
         function saveEvent() {
             const newEvent = {
                 id: Date.now(),
                 title: document.getElementById('ev-title').value,
                 day: document.getElementById('ev-day').value,
                 time: document.getElementById('ev-time').value,
-                desc: document.getElementById('ev-desc').value
+                desc: document.getElementById('ev-desc').value,
+                image: document.getElementById('ev-image').value,
+                status: 'active' // 'active', 'passed', 'canceled'
             };
             
             if(!newEvent.title || !newEvent.time) {
@@ -382,16 +361,13 @@
             }
 
             appEvents.push(newEvent);
-            
-            // Ordena os eventos por horário
             appEvents.sort((a, b) => a.time.localeCompare(b.time));
-            
             localStorage.setItem('agendaEvents', JSON.stringify(appEvents));
             
-            // Limpa o formulário
             document.getElementById('ev-title').value = '';
             document.getElementById('ev-time').value = '';
             document.getElementById('ev-desc').value = '';
+            document.getElementById('ev-image').value = '';
             
             closeModal('event-modal');
             renderEvents();
@@ -405,24 +381,29 @@
             }
         }
 
-        // Renderizar Eventos na Tela
+        function changeEventStatus(id, newStatus) {
+            const index = appEvents.findIndex(ev => ev.id === id);
+            if(index !== -1) {
+                appEvents[index].status = newStatus;
+                localStorage.setItem('agendaEvents', JSON.stringify(appEvents));
+                renderEvents();
+            }
+        }
+
         function renderEvents() {
             const listContainer = document.getElementById('events-list-container');
             listContainer.innerHTML = '';
             
-            // Limpa colunas do calendário
             const days = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
             days.forEach(day => {
                 const col = document.querySelector(`#col-${day} .day-content`);
                 if(col) col.innerHTML = '';
             });
 
-            // Agrupa eventos por dia para a visualização em lista
             const eventsByDay = {};
             days.forEach(d => eventsByDay[d] = []);
             appEvents.forEach(ev => { if(eventsByDay[ev.day]) eventsByDay[ev.day].push(ev); });
 
-            // Renderiza Lista
             days.forEach(day => {
                 if(eventsByDay[day].length > 0) {
                     const dayLabel = document.createElement('h2');
@@ -432,29 +413,41 @@
                     listContainer.appendChild(dayLabel);
 
                     eventsByDay[day].forEach(ev => {
-                        // Render no formato de Lista
+                        const statusClass = ev.status === 'passed' ? 'status-passed' : (ev.status === 'canceled' ? 'status-canceled' : '');
+                        const canceledBadge = ev.status === 'canceled' ? '<span class="badge-canceled">CANCELADO</span>' : '';
+                        
+                        // Cartão da Lista
                         const card = document.createElement('div');
-                        card.className = 'event-card';
+                        card.className = `event-card ${statusClass}`;
                         card.innerHTML = `
-                            <div class="event-details">
-                                <h3>${ev.title}</h3>
-                                <p><strong>🕒 ${ev.time}</strong> ${ev.desc ? ' - ' + ev.desc : ''}</p>
+                            <div class="event-header">
+                                <div class="event-details">
+                                    <h3>${ev.title} ${canceledBadge}</h3>
+                                    <p><strong>🕒 ${ev.time}</strong> ${ev.desc ? ' - ' + ev.desc : ''}</p>
+                                </div>
                             </div>
-                            <button class="controls button delete-btn" onclick="deleteEvent(${ev.id})">Excluir</button>
+                            ${ev.image ? `<img src="${ev.image}" class="event-image" alt="Cartaz do Evento">` : ''}
+                            
+                            <div class="event-actions">
+                                <select class="status-select" onchange="changeEventStatus(${ev.id}, this.value)">
+                                    <option value="active" ${ev.status === 'active' ? 'selected' : ''}>🟢 Ativo</option>
+                                    <option value="passed" ${ev.status === 'passed' ? 'selected' : ''}>⚪ Já Passou</option>
+                                    <option value="canceled" ${ev.status === 'canceled' ? 'selected' : ''}>🔴 Cancelado</option>
+                                </select>
+                                <button class="delete-btn" onclick="deleteEvent(${ev.id})">Excluir</button>
+                            </div>
                         `;
                         listContainer.appendChild(card);
 
-                        // Render no formato de Calendário
+                        // Cartão do Calendário
                         const calContent = document.querySelector(`#col-${day} .day-content`);
                         if(calContent) {
                             const calCard = document.createElement('div');
-                            calCard.className = 'cal-event';
+                            calCard.className = `cal-event ${statusClass}`;
                             calCard.innerHTML = `
                                 <strong>${ev.time}</strong><br>
-                                ${ev.title}
-                                <div style="text-align: right; margin-top: 5px;">
-                                    <button style="background:none;border:none;color:red;cursor:pointer;font-size:12px;" onclick="deleteEvent(${ev.id})">Excluir</button>
-                                </div>
+                                ${ev.title} ${canceledBadge}
+                                ${ev.image ? `<img src="${ev.image}" alt="Cartaz">` : ''}
                             `;
                             calContent.appendChild(calCard);
                         }
@@ -467,19 +460,13 @@
             }
         }
 
-        // Alternar Visualizações e Modais
         function toggleView() {
             const list = document.getElementById('list-view');
             const cal = document.getElementById('calendar-view');
-            
             if(currentView === 'list') {
-                list.classList.remove('active');
-                cal.classList.add('active');
-                currentView = 'calendar';
+                list.classList.remove('active'); cal.classList.add('active'); currentView = 'calendar';
             } else {
-                cal.classList.remove('active');
-                list.classList.add('active');
-                currentView = 'list';
+                cal.classList.remove('active'); list.classList.add('active'); currentView = 'list';
             }
         }
 
@@ -488,3 +475,4 @@
     </script>
 </body>
 </html>
+
