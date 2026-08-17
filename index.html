@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda Semanal</title>
+    <style>
+        /* Variáveis CSS que serão alteradas dinamicamente */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --text-color: #333333;
+            --bg-color: #f5f6fa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s;
+        }
+
+        /* --- Tela de Inicialização --- */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--primary-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            transition: opacity 0.8s ease-out;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- Layout Principal --- */
+        #app {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .brand img {
+            max-height: 60px;
+            border-radius: 8px;
+            display: none; /* Mostra só se tiver URL */
+        }
+        .brand h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+        }
+
+        .controls button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+        .controls button:hover { opacity: 0.8; }
+
+        /* --- Visualizações --- */
+        .view-container { display: none; }
+        .view-container.active { display: block; animation: fadeIn 0.5s; }
+
+        /* Visualização de Lista */
+        .event-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .event-card {
+            background: white;
+            padding: 20px;
+            border-left: 5px solid var(--secondary-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .event-details h3 { color: var(--primary-color); margin-bottom: 5px; }
+        .event-details p { color: #666; font-size: 0.9rem; }
+        
+        .delete-btn {
+            background-color: #e74c3c !important;
+            padding: 8px 12px !important;
+        }
+
+        /* Visualização de Calendário */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 15px;
+        }
+        .day-column {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 300px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .day-header {
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            background: var(--primary-color);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .cal-event {
+            background: var(--bg-color);
+            border-left: 3px solid var(--secondary-color);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        /* --- Modais (Formulários) --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .modal h2 { margin-bottom: 20px; color: var(--primary-color); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;
+        }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn-cancel { background-color: #95a5a6 !important; }
+        .btn-save { background-color: var(--primary-color); color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
+
+        @media (max-width: 768px) {
+            .calendar-grid { grid-template-columns: 1fr; }
+            header { flex-direction: column; gap: 15px; text-align: center; }
+            .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+            .controls button { margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tela de Carregamento -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <h2 id="loader-text">Carregando Agenda...</h2>
+    </div>
+
+    <!-- App Principal -->
+    <div id="app">
+        <header>
+            <div class="brand">
+                <img id="display-logo" src="" alt="Logo">
+                <h1 id="display-name">Minha Igreja</h1>
+            </div>
+            <div class="controls">
+                <button onclick="toggleView()">Mudar Visualização</button>
+                <button onclick="openModal('event-modal')">+ Novo Evento</button>
+                <button onclick="openModal('settings-modal')">⚙️ Configurações</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Visão de Lista -->
+            <div id="list-view" class="view-container active">
+                <div class="event-list" id="events-list-container"></div>
+            </div>
+
+            <!-- Visão de Calendário -->
+            <div id="calendar-view" class="view-container">
+                <div class="calendar-grid">
+                    <div class="day-column" id="col-Domingo"><div class="day-header">Domingo</div><div class="day-content"></div></div>
+                    <div class="day-column" id="col-Segunda"><div class="day-header">Segunda</div><div class="day-content"></div></div>
+                    <div class="day-column" id="col-Terça"><div class="day-header">Terça</div><div class="day-content"></div></div>
+                    <div class="day-column" id="col-Quarta"><div class="day-header">Quarta</div><div class="day-content"></div></div>
+                    <div class="day-column" id="col-Quinta"><div class="day-header">Quinta</div><div class="day-content"></div></div>
+                    <div class="day-column" id="col-Sexta"><div class="day-header">Sexta</div><div class="day-content"></div></div>
+                    <div class="day-column" id="col-Sábado"><div class="day-header">Sábado</div><div class="day-content"></div></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Configurações -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal">
+            <h2>Configurações do App</h2>
+            <div class="form-group">
+                <label>Nome da Igreja</label>
+                <input type="text" id="set-name" placeholder="Ex: Igreja Batista Central">
+            </div>
+            <div class="form-group">
+                <label>URL da Logo (Link da imagem)</label>
+                <input type="text" id="set-logo" placeholder="https://link-da-sua-imagem.com/logo.png">
+            </div>
+            <div class="form-group">
+                <label>Cor Principal</label>
+                <input type="color" id="set-color-1">
+            </div>
+            <div class="form-group">
+                <label>Cor Secundária</label>
+                <input type="color" id="set-color-2">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-save btn-cancel" onclick="closeModal('settings-modal')">Cancelar</button>
+                <button class="btn-save" onclick="saveSettings()">Salvar Configurações</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Novo Evento -->
+    <div id="event-modal" class="modal-overlay">
+        <div class="modal">
+            <h2>Adicionar Evento</h2>
+            <div class="form-group">
+                <label>Título do Evento</label>
+                <input type="text" id="ev-title" placeholder="Ex: Culto de Jovens">
+            </div>
+            <div class="form-group">
+                <label>Dia da Semana</label>
+                <select id="ev-day">
+                    <option value="Domingo">Domingo</option>
+                    <option value="Segunda">Segunda</option>
+                    <option value="Terça">Terça</option>
+                    <option value="Quarta">Quarta</option>
+                    <option value="Quinta">Quinta</option>
+                    <option value="Sexta">Sexta</option>
+                    <option value="Sábado">Sábado</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Horário</label>
+                <input type="time" id="ev-time">
+            </div>
+            <div class="form-group">
+                <label>Descrição (Opcional)</label>
+                <textarea id="ev-desc" rows="3"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-save btn-cancel" onclick="closeModal('event-modal')">Cancelar</button>
+                <button class="btn-save" onclick="saveEvent()">Salvar Evento</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados Padrão Iniciais
+        const defaultSettings = {
+            name: "Minha Igreja",
+            logo: "",
+            primaryColor: "#2c3e50",
+            secondaryColor: "#34495e"
+        };
+
+        // Estado da Aplicação
+        let appSettings = JSON.parse(localStorage.getItem('agendaSettings')) || defaultSettings;
+        let appEvents = JSON.parse(localStorage.getItem('agendaEvents')) || [];
+        let currentView = 'list'; // 'list' ou 'calendar'
+
+        // Inicialização
+        window.onload = () => {
+            setTimeout(() => {
+                document.getElementById('loader').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('app').style.display = 'block';
+                    applySettings();
+                    renderEvents();
+                }, 800);
+            }, 1500); // Tempo da animação legalzinha
+        };
+
+        // Aplica cores, logo e nome
+        function applySettings() {
+            document.documentElement.style.setProperty('--primary-color', appSettings.primaryColor);
+            document.documentElement.style.setProperty('--secondary-color', appSettings.secondaryColor);
+            
+            document.getElementById('display-name').innerText = appSettings.name;
+            document.getElementById('loader-text').innerText = appSettings.name;
+            
+            const logoEl = document.getElementById('display-logo');
+            if(appSettings.logo) {
+                logoEl.src = appSettings.logo;
+                logoEl.style.display = 'block';
+            } else {
+                logoEl.style.display = 'none';
+            }
+
+            // Preenche os campos do modal de configurações
+            document.getElementById('set-name').value = appSettings.name;
+            document.getElementById('set-logo').value = appSettings.logo;
+            document.getElementById('set-color-1').value = appSettings.primaryColor;
+            document.getElementById('set-color-2').value = appSettings.secondaryColor;
+        }
+
+        // Salvar Configurações
+        function saveSettings() {
+            appSettings = {
+                name: document.getElementById('set-name').value || "Minha Igreja",
+                logo: document.getElementById('set-logo').value,
+                primaryColor: document.getElementById('set-color-1').value,
+                secondaryColor: document.getElementById('set-color-2').value
+            };
+            localStorage.setItem('agendaSettings', JSON.stringify(appSettings));
+            applySettings();
+            closeModal('settings-modal');
+        }
+
+        // Gerenciar Eventos
+        function saveEvent() {
+            const newEvent = {
+                id: Date.now(),
+                title: document.getElementById('ev-title').value,
+                day: document.getElementById('ev-day').value,
+                time: document.getElementById('ev-time').value,
+                desc: document.getElementById('ev-desc').value
+            };
+            
+            if(!newEvent.title || !newEvent.time) {
+                alert("Por favor, preencha o título e horário.");
+                return;
+            }
+
+            appEvents.push(newEvent);
+            
+            // Ordena os eventos por horário
+            appEvents.sort((a, b) => a.time.localeCompare(b.time));
+            
+            localStorage.setItem('agendaEvents', JSON.stringify(appEvents));
+            
+            // Limpa o formulário
+            document.getElementById('ev-title').value = '';
+            document.getElementById('ev-time').value = '';
+            document.getElementById('ev-desc').value = '';
+            
+            closeModal('event-modal');
+            renderEvents();
+        }
+
+        function deleteEvent(id) {
+            if(confirm("Tem certeza que deseja excluir este evento?")) {
+                appEvents = appEvents.filter(ev => ev.id !== id);
+                localStorage.setItem('agendaEvents', JSON.stringify(appEvents));
+                renderEvents();
+            }
+        }
+
+        // Renderizar Eventos na Tela
+        function renderEvents() {
+            const listContainer = document.getElementById('events-list-container');
+            listContainer.innerHTML = '';
+            
+            // Limpa colunas do calendário
+            const days = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+            days.forEach(day => {
+                const col = document.querySelector(`#col-${day} .day-content`);
+                if(col) col.innerHTML = '';
+            });
+
+            // Agrupa eventos por dia para a visualização em lista
+            const eventsByDay = {};
+            days.forEach(d => eventsByDay[d] = []);
+            appEvents.forEach(ev => { if(eventsByDay[ev.day]) eventsByDay[ev.day].push(ev); });
+
+            // Renderiza Lista
+            days.forEach(day => {
+                if(eventsByDay[day].length > 0) {
+                    const dayLabel = document.createElement('h2');
+                    dayLabel.style.color = 'var(--primary-color)';
+                    dayLabel.style.marginTop = '15px';
+                    dayLabel.innerText = day;
+                    listContainer.appendChild(dayLabel);
+
+                    eventsByDay[day].forEach(ev => {
+                        // Render no formato de Lista
+                        const card = document.createElement('div');
+                        card.className = 'event-card';
+                        card.innerHTML = `
+                            <div class="event-details">
+                                <h3>${ev.title}</h3>
+                                <p><strong>🕒 ${ev.time}</strong> ${ev.desc ? ' - ' + ev.desc : ''}</p>
+                            </div>
+                            <button class="controls button delete-btn" onclick="deleteEvent(${ev.id})">Excluir</button>
+                        `;
+                        listContainer.appendChild(card);
+
+                        // Render no formato de Calendário
+                        const calContent = document.querySelector(`#col-${day} .day-content`);
+                        if(calContent) {
+                            const calCard = document.createElement('div');
+                            calCard.className = 'cal-event';
+                            calCard.innerHTML = `
+                                <strong>${ev.time}</strong><br>
+                                ${ev.title}
+                                <div style="text-align: right; margin-top: 5px;">
+                                    <button style="background:none;border:none;color:red;cursor:pointer;font-size:12px;" onclick="deleteEvent(${ev.id})">Excluir</button>
+                                </div>
+                            `;
+                            calContent.appendChild(calCard);
+                        }
+                    });
+                }
+            });
+            
+            if(appEvents.length === 0) {
+                listContainer.innerHTML = '<p style="text-align:center; padding: 30px;">Nenhum evento agendado. Adicione clicando em "+ Novo Evento".</p>';
+            }
+        }
+
+        // Alternar Visualizações e Modais
+        function toggleView() {
+            const list = document.getElementById('list-view');
+            const cal = document.getElementById('calendar-view');
+            
+            if(currentView === 'list') {
+                list.classList.remove('active');
+                cal.classList.add('active');
+                currentView = 'calendar';
+            } else {
+                cal.classList.remove('active');
+                list.classList.add('active');
+                currentView = 'list';
+            }
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    </script>
+</body>
+</html>
