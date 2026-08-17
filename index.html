@@ -26,23 +26,36 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* --- Tela de Inicialização --- */
+        /* --- Tela de Inicialização (Splash Screen) --- */
         #loader {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: var(--primary-color);
+            background-color: var(--bg-color); /* Agora usa a cor de fundo do app */
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 9999; color: white;
+            z-index: 9999; color: var(--primary-color);
             transition: opacity 0.8s ease-out;
         }
-        .spinner {
-            width: 50px; height: 50px;
-            border: 5px solid rgba(255,255,255,0.3);
-            border-top-color: white; border-radius: 50%;
-            animation: spin 1s linear infinite;
+        #loader-logo {
+            max-height: 150px;
             margin-bottom: 20px;
+            border-radius: 8px;
+            display: none; /* Só aparece se tiver URL */
+            object-fit: contain;
+            animation: pulse 2s infinite;
+        }
+        #loader-text {
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid rgba(0,0,0,0.1);
+            border-top-color: var(--primary-color); border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 0% { transform: scale(0.98); } 50% { transform: scale(1.02); } 100% { transform: scale(0.98); } }
 
         /* --- Layout Principal --- */
         #app {
@@ -59,10 +72,11 @@
 
         .brand { display: flex; align-items: center; gap: 20px; }
         .brand img {
-            max-height: 120px; /* LOGO MAIOR AQUI */
+            max-height: 120px; 
             border-radius: 8px; display: none; object-fit: contain;
         }
-        .brand h1 { color: var(--primary-color); font-size: 2rem; }
+        .brand-info h1 { color: var(--primary-color); font-size: 2rem; margin-bottom: 5px; }
+        .brand-info p { color: #666; font-size: 1rem; font-weight: 500; }
 
         .controls button {
             background-color: var(--primary-color); color: white;
@@ -101,7 +115,7 @@
 
         .status-select {
             padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;
-            outline: none; cursor: pointer;
+            outline: none; cursor: pointer; color: #333;
         }
 
         .delete-btn { background-color: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;}
@@ -134,11 +148,11 @@
         .modal {
             background: white; padding: 30px; border-radius: 12px;
             width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); color: #333;
         }
         .modal h2 { margin-bottom: 20px; color: var(--primary-color); }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
         .form-group input, .form-group select, .form-group textarea {
             width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;
         }
@@ -159,10 +173,11 @@
 </head>
 <body>
 
-    <!-- Tela de Carregamento -->
+    <!-- Tela de Carregamento (Splash Screen) -->
     <div id="loader">
+        <img id="loader-logo" src="" alt="Logo Igreja">
+        <h1 id="loader-text">Carregando...</h1>
         <div class="spinner"></div>
-        <h2 id="loader-text">Carregando Agenda...</h2>
     </div>
 
     <!-- App Principal -->
@@ -170,7 +185,10 @@
         <header>
             <div class="brand">
                 <img id="display-logo" src="" alt="Logo">
-                <h1 id="display-name">Minha Igreja</h1>
+                <div class="brand-info">
+                    <h1 id="display-name">Minha Igreja</h1>
+                    <p id="current-date"></p>
+                </div>
             </div>
             <div class="controls">
                 <button onclick="toggleView()">Mudar Visualização</button>
@@ -293,26 +311,51 @@
         let appEvents = JSON.parse(localStorage.getItem('agendaEvents')) || [];
         let currentView = 'list';
 
-        window.onload = () => {
+        // Aplica as cores antes mesmo da página terminar de carregar para a Splash Screen ficar perfeita
+        document.documentElement.style.setProperty('--primary-color', appSettings.primaryColor);
+        document.documentElement.style.setProperty('--secondary-color', appSettings.secondaryColor);
+        document.documentElement.style.setProperty('--bg-color', appSettings.bgColor);
+        document.documentElement.style.setProperty('--text-color', appSettings.textColor);
+
+        // Inicialização Principal
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // Configura a Splash Screen com Logo e Nome
+            document.getElementById('loader-text').innerText = appSettings.name;
+            const loaderLogo = document.getElementById('loader-logo');
+            if(appSettings.logo) {
+                loaderLogo.src = appSettings.logo;
+                loaderLogo.style.display = 'block';
+            }
+
+            // Configura a Data Atual
+            exibirDataAtual();
+
+            // Configura o restante do App
+            applySettings();
+            renderEvents();
+
+            // Animação de transição da Splash Screen (2.5 segundos para a pessoa ver a logo)
             setTimeout(() => {
                 document.getElementById('loader').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('loader').style.display = 'none';
                     document.getElementById('app').style.display = 'block';
-                    applySettings();
-                    renderEvents();
                 }, 800);
-            }, 1000);
-        };
+            }, 2500);
+        });
+
+        // Função para formatar e exibir a data atual
+        function exibirDataAtual() {
+            const opcoes = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            let dataFormatada = new Date().toLocaleDateString('pt-BR', opcoes);
+            // Coloca a primeira letra em maiúsculo (ex: "Segunda-feira, 17 de agosto de 2026")
+            dataFormatada = dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1);
+            document.getElementById('current-date').innerText = dataFormatada;
+        }
 
         function applySettings() {
-            document.documentElement.style.setProperty('--primary-color', appSettings.primaryColor);
-            document.documentElement.style.setProperty('--secondary-color', appSettings.secondaryColor);
-            document.documentElement.style.setProperty('--bg-color', appSettings.bgColor);
-            document.documentElement.style.setProperty('--text-color', appSettings.textColor);
-            
             document.getElementById('display-name').innerText = appSettings.name;
-            document.getElementById('loader-text').innerText = appSettings.name;
             
             const logoEl = document.getElementById('display-logo');
             if(appSettings.logo) {
@@ -322,6 +365,7 @@
                 logoEl.style.display = 'none';
             }
 
+            // Preenche os inputs do painel de configuração
             document.getElementById('set-name').value = appSettings.name;
             document.getElementById('set-logo').value = appSettings.logo;
             document.getElementById('set-color-1').value = appSettings.primaryColor;
@@ -340,8 +384,9 @@
                 textColor: document.getElementById('set-text').value
             };
             localStorage.setItem('agendaSettings', JSON.stringify(appSettings));
-            applySettings();
-            closeModal('settings-modal');
+            
+            // Recarrega a página para aplicar as cores globalmente, incluindo a Splash Screen
+            window.location.reload();
         }
 
         function saveEvent() {
@@ -352,7 +397,7 @@
                 time: document.getElementById('ev-time').value,
                 desc: document.getElementById('ev-desc').value,
                 image: document.getElementById('ev-image').value,
-                status: 'active' // 'active', 'passed', 'canceled'
+                status: 'active'
             };
             
             if(!newEvent.title || !newEvent.time) {
