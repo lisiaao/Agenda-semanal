@@ -26,41 +26,51 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* --- Tela de Inicialização (Splash Screen) --- */
-        #loader {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: var(--bg-color); /* Agora usa a cor de fundo do app */
+        /* --- Tela de Boas Vindas --- */
+        #welcome-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: var(--bg-color);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 9999; color: var(--primary-color);
-            transition: opacity 0.8s ease-out;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s;
         }
-        #loader-logo {
+        #welcome-screen .content-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 90%;
+            width: 400px;
+        }
+        #welcome-logo {
             max-height: 150px;
             margin-bottom: 20px;
-            border-radius: 8px;
-            display: none; /* Só aparece se tiver URL */
+            border-radius: 10px;
             object-fit: contain;
-            animation: pulse 2s infinite;
+            display: none;
         }
-        #loader-text {
-            font-size: 2.2rem;
-            margin-bottom: 25px;
-            text-align: center;
+        #welcome-name { color: var(--primary-color); font-size: 2.2rem; margin-bottom: 10px; }
+        #welcome-screen p { color: #666; margin-bottom: 30px; font-size: 1.1rem; }
+        
+        .btn-start {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, opacity 0.2s;
+            width: 100%;
         }
-        .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid rgba(0,0,0,0.1);
-            border-top-color: var(--primary-color); border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes pulse { 0% { transform: scale(0.98); } 50% { transform: scale(1.02); } 100% { transform: scale(0.98); } }
+        .btn-start:hover { transform: scale(1.05); opacity: 0.9; }
 
         /* --- Layout Principal --- */
         #app {
             display: none; max-width: 1200px; margin: 0 auto; padding: 20px;
-            opacity: 0; animation: fadeIn 1s forwards;
+            opacity: 0; animation: fadeIn 0.8s forwards;
         }
         @keyframes fadeIn { to { opacity: 1; } }
 
@@ -72,11 +82,9 @@
 
         .brand { display: flex; align-items: center; gap: 20px; }
         .brand img {
-            max-height: 120px; 
-            border-radius: 8px; display: none; object-fit: contain;
+            max-height: 100px; border-radius: 8px; display: none; object-fit: contain;
         }
-        .brand-info h1 { color: var(--primary-color); font-size: 2rem; margin-bottom: 5px; }
-        .brand-info p { color: #666; font-size: 1rem; font-weight: 500; }
+        .brand h1 { color: var(--primary-color); font-size: 2rem; }
 
         .controls button {
             background-color: var(--primary-color); color: white;
@@ -92,67 +100,77 @@
 
         /* Visualização de Lista */
         .event-list { display: flex; flex-direction: column; gap: 15px; }
+        .date-header {
+            color: var(--primary-color);
+            margin-top: 20px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid var(--secondary-color);
+        }
         .event-card {
             background: white; padding: 20px; border-left: 5px solid var(--secondary-color);
             border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             display: flex; flex-direction: column; gap: 10px;
             transition: all 0.3s ease;
         }
-        
         .event-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .event-details h3 { color: var(--primary-color); margin-bottom: 5px; font-size: 1.3rem; }
         .event-details p { color: #666; font-size: 0.95rem; line-height: 1.4; }
-        
         .event-image {
             max-width: 100%; max-height: 350px; object-fit: cover;
             border-radius: 8px; margin-top: 10px; border: 1px solid #eee;
         }
-
         .event-actions {
             display: flex; gap: 10px; align-items: center; margin-top: 10px;
             padding-top: 10px; border-top: 1px solid #eee;
         }
 
-        .status-select {
-            padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;
-            outline: none; cursor: pointer; color: #333;
-        }
-
+        .status-select { padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold; outline: none; cursor: pointer; }
         .delete-btn { background-color: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;}
         .delete-btn:hover { opacity: 0.8; }
 
         /* Estilos de Status */
         .status-passed { opacity: 0.6; filter: grayscale(80%); border-left-color: #95a5a6; }
         .status-passed h3 { color: #7f8c8d; }
-        
         .status-canceled { border-left-color: #e74c3c; background-color: #fdf5f5; }
         .status-canceled h3 { text-decoration: line-through; color: #e74c3c; }
         .badge-canceled { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-left: 10px; text-decoration: none !important; display: inline-block;}
 
         /* Visualização de Calendário */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 15px; }
-        .day-column { background: white; border-radius: 8px; padding: 15px; min-height: 300px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .day-header { text-align: center; font-weight: bold; color: white; background: var(--primary-color); padding: 10px; border-radius: 6px; margin-bottom: 15px; }
+        .calendar-nav {
+            display: flex; justify-content: space-between; align-items: center;
+            background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .calendar-nav button {
+            background-color: var(--secondary-color); color: white;
+            border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;
+        }
+        .calendar-nav h2 { color: var(--primary-color); font-size: 1.2rem; }
+
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        .day-column { background: white; border-radius: 8px; padding: 10px; min-height: 300px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .day-header { text-align: center; font-weight: bold; color: white; background: var(--primary-color); padding: 8px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem;}
+        .day-header small { display: block; font-weight: normal; font-size: 0.8rem; margin-top: 3px; }
         
         .cal-event {
             background: var(--bg-color); border-left: 3px solid var(--secondary-color);
-            padding: 10px; margin-bottom: 10px; border-radius: 4px; font-size: 0.85rem;
+            padding: 8px; margin-bottom: 8px; border-radius: 4px; font-size: 0.85rem;
         }
         .cal-event img { width: 100%; border-radius: 4px; margin-top: 5px; }
 
         /* --- Modais --- */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;
+            background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000;
         }
         .modal {
             background: white; padding: 30px; border-radius: 12px;
             width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2); color: #333;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
         .modal h2 { margin-bottom: 20px; color: var(--primary-color); }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
         .form-group input, .form-group select, .form-group textarea {
             width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;
         }
@@ -168,16 +186,20 @@
             .brand { flex-direction: column; }
             .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
             .controls button { margin: 0; }
+            .calendar-nav { flex-direction: column; gap: 10px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Tela de Carregamento (Splash Screen) -->
-    <div id="loader">
-        <img id="loader-logo" src="" alt="Logo Igreja">
-        <h1 id="loader-text">Carregando...</h1>
-        <div class="spinner"></div>
+    <!-- Tela de Boas Vindas -->
+    <div id="welcome-screen">
+        <div class="content-box">
+            <img id="welcome-logo" src="" alt="Logo da Igreja">
+            <h1 id="welcome-name">Minha Igreja</h1>
+            <p>Bem-vindo(a) à nossa agenda semanal oficial.</p>
+            <button class="btn-start" onclick="startApp()">Iniciar Agenda</button>
+        </div>
     </div>
 
     <!-- App Principal -->
@@ -185,10 +207,7 @@
         <header>
             <div class="brand">
                 <img id="display-logo" src="" alt="Logo">
-                <div class="brand-info">
-                    <h1 id="display-name">Minha Igreja</h1>
-                    <p id="current-date"></p>
-                </div>
+                <h1 id="display-name">Minha Igreja</h1>
             </div>
             <div class="controls">
                 <button onclick="toggleView()">Mudar Visualização</button>
@@ -205,14 +224,13 @@
 
             <!-- Visão de Calendário -->
             <div id="calendar-view" class="view-container">
-                <div class="calendar-grid">
-                    <div class="day-column" id="col-Domingo"><div class="day-header">Domingo</div><div class="day-content"></div></div>
-                    <div class="day-column" id="col-Segunda"><div class="day-header">Segunda</div><div class="day-content"></div></div>
-                    <div class="day-column" id="col-Terça"><div class="day-header">Terça</div><div class="day-content"></div></div>
-                    <div class="day-column" id="col-Quarta"><div class="day-header">Quarta</div><div class="day-content"></div></div>
-                    <div class="day-column" id="col-Quinta"><div class="day-header">Quinta</div><div class="day-content"></div></div>
-                    <div class="day-column" id="col-Sexta"><div class="day-header">Sexta</div><div class="day-content"></div></div>
-                    <div class="day-column" id="col-Sábado"><div class="day-header">Sábado</div><div class="day-content"></div></div>
+                <div class="calendar-nav">
+                    <button onclick="changeWeek(-1)">⬅️ Semana Anterior</button>
+                    <h2 id="calendar-week-label">Semana atual</h2>
+                    <button onclick="changeWeek(1)">Próxima Semana ➡️</button>
+                </div>
+                <div class="calendar-grid" id="calendar-grid-container">
+                    <!-- Colunas geradas via JavaScript -->
                 </div>
             </div>
         </main>
@@ -266,16 +284,8 @@
                 <input type="text" id="ev-title" placeholder="Ex: Culto de Jovens">
             </div>
             <div class="form-group">
-                <label>Dia da Semana</label>
-                <select id="ev-day">
-                    <option value="Domingo">Domingo</option>
-                    <option value="Segunda">Segunda</option>
-                    <option value="Terça">Terça</option>
-                    <option value="Quarta">Quarta</option>
-                    <option value="Quinta">Quinta</option>
-                    <option value="Sexta">Sexta</option>
-                    <option value="Sábado">Sábado</option>
-                </select>
+                <label>Data</label>
+                <input type="date" id="ev-date">
             </div>
             <div class="form-group">
                 <label>Horário</label>
@@ -310,62 +320,50 @@
         let appSettings = JSON.parse(localStorage.getItem('agendaSettings')) || defaultSettings;
         let appEvents = JSON.parse(localStorage.getItem('agendaEvents')) || [];
         let currentView = 'list';
+        let currentWeekOffset = 0; // 0 = Esta semana, -1 = Passada, 1 = Próxima
+        
+        const diasSemanaNomes = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
 
-        // Aplica as cores antes mesmo da página terminar de carregar para a Splash Screen ficar perfeita
-        document.documentElement.style.setProperty('--primary-color', appSettings.primaryColor);
-        document.documentElement.style.setProperty('--secondary-color', appSettings.secondaryColor);
-        document.documentElement.style.setProperty('--bg-color', appSettings.bgColor);
-        document.documentElement.style.setProperty('--text-color', appSettings.textColor);
-
-        // Inicialização Principal
-        document.addEventListener("DOMContentLoaded", () => {
-            
-            // Configura a Splash Screen com Logo e Nome
-            document.getElementById('loader-text').innerText = appSettings.name;
-            const loaderLogo = document.getElementById('loader-logo');
-            if(appSettings.logo) {
-                loaderLogo.src = appSettings.logo;
-                loaderLogo.style.display = 'block';
-            }
-
-            // Configura a Data Atual
-            exibirDataAtual();
-
-            // Configura o restante do App
+        window.onload = () => {
             applySettings();
-            renderEvents();
+            // Preenche o campo de data com a data de hoje ao abrir
+            document.getElementById('ev-date').valueAsDate = new Date();
+        };
 
-            // Animação de transição da Splash Screen (2.5 segundos para a pessoa ver a logo)
+        // Inicia o App saindo da tela de boas-vindas
+        function startApp() {
+            const welcome = document.getElementById('welcome-screen');
+            welcome.style.opacity = '0';
             setTimeout(() => {
-                document.getElementById('loader').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('loader').style.display = 'none';
-                    document.getElementById('app').style.display = 'block';
-                }, 800);
-            }, 2500);
-        });
-
-        // Função para formatar e exibir a data atual
-        function exibirDataAtual() {
-            const opcoes = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-            let dataFormatada = new Date().toLocaleDateString('pt-BR', opcoes);
-            // Coloca a primeira letra em maiúsculo (ex: "Segunda-feira, 17 de agosto de 2026")
-            dataFormatada = dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1);
-            document.getElementById('current-date').innerText = dataFormatada;
+                welcome.style.visibility = 'hidden';
+                welcome.style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                renderEvents();
+            }, 500);
         }
 
         function applySettings() {
-            document.getElementById('display-name').innerText = appSettings.name;
+            document.documentElement.style.setProperty('--primary-color', appSettings.primaryColor);
+            document.documentElement.style.setProperty('--secondary-color', appSettings.secondaryColor);
+            document.documentElement.style.setProperty('--bg-color', appSettings.bgColor);
+            document.documentElement.style.setProperty('--text-color', appSettings.textColor);
             
-            const logoEl = document.getElementById('display-logo');
+            // Textos
+            document.getElementById('display-name').innerText = appSettings.name;
+            document.getElementById('welcome-name').innerText = appSettings.name;
+            
+            // Logos
+            const displayLogo = document.getElementById('display-logo');
+            const welcomeLogo = document.getElementById('welcome-logo');
             if(appSettings.logo) {
-                logoEl.src = appSettings.logo;
-                logoEl.style.display = 'block';
+                displayLogo.src = appSettings.logo; displayLogo.style.display = 'block';
+                welcomeLogo.src = appSettings.logo; welcomeLogo.style.display = 'inline-block';
             } else {
-                logoEl.style.display = 'none';
+                displayLogo.style.display = 'none';
+                welcomeLogo.style.display = 'none';
             }
 
-            // Preenche os inputs do painel de configuração
+            // Formulário de Config
             document.getElementById('set-name').value = appSettings.name;
             document.getElementById('set-logo').value = appSettings.logo;
             document.getElementById('set-color-1').value = appSettings.primaryColor;
@@ -384,31 +382,34 @@
                 textColor: document.getElementById('set-text').value
             };
             localStorage.setItem('agendaSettings', JSON.stringify(appSettings));
-            
-            // Recarrega a página para aplicar as cores globalmente, incluindo a Splash Screen
-            window.location.reload();
+            applySettings();
+            closeModal('settings-modal');
         }
 
         function saveEvent() {
+            const dateVal = document.getElementById('ev-date').value;
+            const timeVal = document.getElementById('ev-time').value;
+            const titleVal = document.getElementById('ev-title').value;
+
+            if(!titleVal || !dateVal || !timeVal) {
+                alert("Por favor, preencha o Título, Data e Horário.");
+                return;
+            }
+
             const newEvent = {
                 id: Date.now(),
-                title: document.getElementById('ev-title').value,
-                day: document.getElementById('ev-day').value,
-                time: document.getElementById('ev-time').value,
+                title: titleVal,
+                date: dateVal, // Formato YYYY-MM-DD
+                time: timeVal,
                 desc: document.getElementById('ev-desc').value,
                 image: document.getElementById('ev-image').value,
                 status: 'active'
             };
-            
-            if(!newEvent.title || !newEvent.time) {
-                alert("Por favor, preencha o título e horário.");
-                return;
-            }
 
             appEvents.push(newEvent);
-            appEvents.sort((a, b) => a.time.localeCompare(b.time));
             localStorage.setItem('agendaEvents', JSON.stringify(appEvents));
             
+            // Limpa form (exceto a data, para facilitar adição de vários no mesmo dia)
             document.getElementById('ev-title').value = '';
             document.getElementById('ev-time').value = '';
             document.getElementById('ev-desc').value = '';
@@ -435,74 +436,154 @@
             }
         }
 
+        // --- SISTEMA DE DATAS E RENDERIZAÇÃO ---
+
+        // Função auxiliar para criar as datas da semana a ser exibida no calendário
+        function getWeekDates(offset) {
+            let hoje = new Date();
+            // Reseta a hora para evitar problemas de fuso
+            hoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+            
+            let diaDaSemana = hoje.getDay(); // 0 (Dom) a 6 (Sab)
+            let inicioDaSemana = new Date(hoje);
+            inicioDaSemana.setDate(hoje.getDate() - diaDaSemana + (offset * 7));
+
+            let dias = [];
+            for(let i=0; i<7; i++) {
+                let d = new Date(inicioDaSemana);
+                d.setDate(inicioDaSemana.getDate() + i);
+                
+                let yyyy = d.getFullYear();
+                let mm = String(d.getMonth() + 1).padStart(2, '0');
+                let dd = String(d.getDate()).padStart(2, '0');
+                
+                dias.push({
+                    stringData: `${yyyy}-${mm}-${dd}`,
+                    dia: dd,
+                    mes: mm,
+                    ano: yyyy,
+                    nomeDia: diasSemanaNomes[i]
+                });
+            }
+            return dias;
+        }
+
+        function formatarDataLista(dateStr) {
+            if(!dateStr) return "Data Inválida";
+            const parts = dateStr.split('-');
+            const d = new Date(parts[0], parts[1]-1, parts[2]);
+            return `${diasSemanaNomes[d.getDay()]}, ${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        function changeWeek(direction) {
+            currentWeekOffset += direction;
+            renderEvents();
+        }
+
         function renderEvents() {
+            // 1. ORDENAR TODOS OS EVENTOS (Data e depois Horário)
+            appEvents.sort((a, b) => {
+                const dateTimeA = (a.date || "") + "T" + (a.time || "");
+                const dateTimeB = (b.date || "") + "T" + (b.time || "");
+                return dateTimeA.localeCompare(dateTimeB);
+            });
+
+            // --- RENDERIZAR VISUALIZAÇÃO EM LISTA ---
             const listContainer = document.getElementById('events-list-container');
             listContainer.innerHTML = '';
             
-            const days = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-            days.forEach(day => {
-                const col = document.querySelector(`#col-${day} .day-content`);
-                if(col) col.innerHTML = '';
+            // Agrupar eventos por data para a lista
+            const eventsByDate = {};
+            appEvents.forEach(ev => {
+                if(!ev.date) return; // ignora eventos velhos sem data
+                if(!eventsByDate[ev.date]) eventsByDate[ev.date] = [];
+                eventsByDate[ev.date].push(ev);
             });
 
-            const eventsByDay = {};
-            days.forEach(d => eventsByDay[d] = []);
-            appEvents.forEach(ev => { if(eventsByDay[ev.day]) eventsByDay[ev.day].push(ev); });
+            const datasOrdenadas = Object.keys(eventsByDate).sort();
 
-            days.forEach(day => {
-                if(eventsByDay[day].length > 0) {
-                    const dayLabel = document.createElement('h2');
-                    dayLabel.style.color = 'var(--primary-color)';
-                    dayLabel.style.marginTop = '15px';
-                    dayLabel.innerText = day;
-                    listContainer.appendChild(dayLabel);
+            datasOrdenadas.forEach(dataStr => {
+                const dayLabel = document.createElement('h2');
+                dayLabel.className = 'date-header';
+                dayLabel.innerText = formatarDataLista(dataStr);
+                listContainer.appendChild(dayLabel);
 
-                    eventsByDay[day].forEach(ev => {
-                        const statusClass = ev.status === 'passed' ? 'status-passed' : (ev.status === 'canceled' ? 'status-canceled' : '');
-                        const canceledBadge = ev.status === 'canceled' ? '<span class="badge-canceled">CANCELADO</span>' : '';
+                eventsByDate[dataStr].forEach(ev => {
+                    const statusClass = ev.status === 'passed' ? 'status-passed' : (ev.status === 'canceled' ? 'status-canceled' : '');
+                    const canceledBadge = ev.status === 'canceled' ? '<span class="badge-canceled">CANCELADO</span>' : '';
+                    
+                    const card = document.createElement('div');
+                    card.className = `event-card ${statusClass}`;
+                    card.innerHTML = `
+                        <div class="event-header">
+                            <div class="event-details">
+                                <h3>${ev.title} ${canceledBadge}</h3>
+                                <p><strong>🕒 ${ev.time}</strong> ${ev.desc ? ' - ' + ev.desc : ''}</p>
+                            </div>
+                        </div>
+                        ${ev.image ? `<img src="${ev.image}" class="event-image" alt="Cartaz">` : ''}
                         
-                        // Cartão da Lista
-                        const card = document.createElement('div');
-                        card.className = `event-card ${statusClass}`;
-                        card.innerHTML = `
-                            <div class="event-header">
-                                <div class="event-details">
-                                    <h3>${ev.title} ${canceledBadge}</h3>
-                                    <p><strong>🕒 ${ev.time}</strong> ${ev.desc ? ' - ' + ev.desc : ''}</p>
-                                </div>
-                            </div>
-                            ${ev.image ? `<img src="${ev.image}" class="event-image" alt="Cartaz do Evento">` : ''}
-                            
-                            <div class="event-actions">
-                                <select class="status-select" onchange="changeEventStatus(${ev.id}, this.value)">
-                                    <option value="active" ${ev.status === 'active' ? 'selected' : ''}>🟢 Ativo</option>
-                                    <option value="passed" ${ev.status === 'passed' ? 'selected' : ''}>⚪ Já Passou</option>
-                                    <option value="canceled" ${ev.status === 'canceled' ? 'selected' : ''}>🔴 Cancelado</option>
-                                </select>
-                                <button class="delete-btn" onclick="deleteEvent(${ev.id})">Excluir</button>
-                            </div>
-                        `;
-                        listContainer.appendChild(card);
+                        <div class="event-actions">
+                            <select class="status-select" onchange="changeEventStatus(${ev.id}, this.value)">
+                                <option value="active" ${ev.status === 'active' ? 'selected' : ''}>🟢 Ativo</option>
+                                <option value="passed" ${ev.status === 'passed' ? 'selected' : ''}>⚪ Já Passou</option>
+                                <option value="canceled" ${ev.status === 'canceled' ? 'selected' : ''}>🔴 Cancelado</option>
+                            </select>
+                            <button class="delete-btn" onclick="deleteEvent(${ev.id})">Excluir</button>
+                        </div>
+                    `;
+                    listContainer.appendChild(card);
+                });
+            });
+            
+            if(datasOrdenadas.length === 0) {
+                listContainer.innerHTML = '<p style="text-align:center; padding: 30px;">Nenhum evento agendado. Adicione clicando em "+ Novo Evento".</p>';
+            }
 
-                        // Cartão do Calendário
-                        const calContent = document.querySelector(`#col-${day} .day-content`);
-                        if(calContent) {
-                            const calCard = document.createElement('div');
-                            calCard.className = `cal-event ${statusClass}`;
-                            calCard.innerHTML = `
-                                <strong>${ev.time}</strong><br>
-                                ${ev.title} ${canceledBadge}
-                                ${ev.image ? `<img src="${ev.image}" alt="Cartaz">` : ''}
-                            `;
-                            calContent.appendChild(calCard);
-                        }
+            // --- RENDERIZAR VISUALIZAÇÃO DE CALENDÁRIO ---
+            const calGrid = document.getElementById('calendar-grid-container');
+            calGrid.innerHTML = '';
+            
+            const semanaAtual = getWeekDates(currentWeekOffset);
+            
+            // Atualizar o rótulo da semana
+            document.getElementById('calendar-week-label').innerText = 
+                `${semanaAtual[0].dia}/${semanaAtual[0].mes} até ${semanaAtual[6].dia}/${semanaAtual[6].mes}`;
+
+            // Criar as colunas para cada dia da semana calculada
+            semanaAtual.forEach(diaInfo => {
+                const col = document.createElement('div');
+                col.className = 'day-column';
+                
+                // Cabeçalho da coluna (Ex: Domingo, 16/08/2026)
+                col.innerHTML = `
+                    <div class="day-header">
+                        ${diaInfo.nomeDia.split('-')[0]}
+                        <small>${diaInfo.dia}/${diaInfo.mes}/${diaInfo.ano}</small>
+                    </div>
+                    <div class="day-content" id="cal-content-${diaInfo.stringData}"></div>
+                `;
+                calGrid.appendChild(col);
+
+                // Preencher com eventos desse dia específico
+                const contentDiv = col.querySelector(`#cal-content-${diaInfo.stringData}`);
+                
+                if(eventsByDate[diaInfo.stringData]) {
+                    eventsByDate[diaInfo.stringData].forEach(ev => {
+                        const statusClass = ev.status === 'passed' ? 'status-passed' : (ev.status === 'canceled' ? 'status-canceled' : '');
+                        const canceledBadge = ev.status === 'canceled' ? '<span class="badge-canceled">CANCEL</span>' : '';
+                        
+                        const calCard = document.createElement('div');
+                        calCard.className = `cal-event ${statusClass}`;
+                        calCard.innerHTML = `
+                            <strong>${ev.time}</strong><br>
+                            ${ev.title} ${canceledBadge}
+                            ${ev.image ? `<img src="${ev.image}" alt="Cartaz">` : ''}
+                        `;
+                        contentDiv.appendChild(calCard);
                     });
                 }
             });
-            
-            if(appEvents.length === 0) {
-                listContainer.innerHTML = '<p style="text-align:center; padding: 30px;">Nenhum evento agendado. Adicione clicando em "+ Novo Evento".</p>';
-            }
         }
 
         function toggleView() {
@@ -510,6 +591,7 @@
             const cal = document.getElementById('calendar-view');
             if(currentView === 'list') {
                 list.classList.remove('active'); cal.classList.add('active'); currentView = 'calendar';
+                renderEvents(); // Re-render para garantir que o calendário abra na semana correta
             } else {
                 cal.classList.remove('active'); list.classList.add('active'); currentView = 'list';
             }
