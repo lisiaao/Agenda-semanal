@@ -38,7 +38,8 @@
         .btn-start:hover { transform: scale(1.05); background-color: #f1f2f6; }
 
         /* --- Layout Principal --- */
-        #app { display: none; max-width: 1200px; margin: 0 auto; padding: 20px; opacity: 0; animation: fadeIn 0.8s forwards; }
+        #app { display: none; max-width: 1200px; margin: 0 auto; padding: 20px; opacity: 0; }
+        #app.visible { display: block; animation: fadeIn 0.8s forwards; }
         @keyframes fadeIn { to { opacity: 1; } }
 
         header {
@@ -264,16 +265,19 @@
         const mesesNomes = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
         const diasSemana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
 
-        // Data atual do calendário navegável
         let dataAtualCalendario = new Date();
 
+        // Inicializa as configurações visuais assim que o script carrega
         applySettingsToUI();
 
         function startApp() {
-            document.getElementById('welcome-screen').style.opacity = '0';
+            const welcomeScreen = document.getElementById('welcome-screen');
+            const appMain = document.getElementById('app');
+
+            welcomeScreen.style.opacity = '0';
             setTimeout(() => {
-                document.getElementById('welcome-screen').style.display = 'none';
-                document.getElementById('app').style.display = 'block';
+                welcomeScreen.style.display = 'none';
+                appMain.classList.add('visible');
                 renderEvents();
                 renderCalendar();
                 renderBirthdays();
@@ -292,11 +296,14 @@
             const logoEl = document.getElementById('display-logo');
             const welcomeLogoEl = document.getElementById('welcome-logo');
             
-            if(appSettings.logo) {
-                logoEl.src = appSettings.logo; logoEl.style.display = 'block';
-                welcomeLogoEl.src = appSettings.logo; welcomeLogoEl.style.display = 'block';
+            if(appSettings.logo && appSettings.logo.trim() !== "") {
+                logoEl.src = appSettings.logo; 
+                logoEl.style.display = 'block';
+                welcomeLogoEl.src = appSettings.logo; 
+                welcomeLogoEl.style.display = 'block';
             } else {
-                logoEl.style.display = 'none'; welcomeLogoEl.style.display = 'none';
+                logoEl.style.display = 'none'; 
+                welcomeLogoEl.style.display = 'none';
             }
 
             document.getElementById('set-name').value = appSettings.name;
@@ -425,7 +432,6 @@
             });
         }
 
-        // --- Renderização Google Agenda (Mês/Ano) ---
         function mudarMes(direcao) {
             dataAtualCalendario.setMonth(dataAtualCalendario.getMonth() + direcao);
             renderCalendar();
@@ -434,6 +440,7 @@
         function renderCalendar() {
             const grid = document.getElementById('cal-days-grid');
             const title = document.getElementById('cal-month-year-title');
+            if(!grid || !title) return;
             grid.innerHTML = '';
 
             const ano = dataAtualCalendario.getFullYear();
@@ -441,11 +448,8 @@
 
             title.innerText = `${mesesNomes[mes]} de ${ano}`;
 
-            // Primeiro dia do mês
             const primeiroDiaIndex = new Date(ano, mes, 1).getDay();
-            // Último dia do mês atual
             const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
-            // Último dia do mês anterior
             const ultimoDiaMesAnterior = new Date(ano, mes, 0).getDate();
 
             const hoje = new Date();
@@ -453,7 +457,7 @@
             const mesAtual = hoje.getMonth();
             const diaAtual = hoje.getDate();
 
-            let totalCelulasGrid = 42; // Grade de 6 semanas fixas (padrão Google Agenda)
+            let totalCelulasGrid = 42;
             let contadorDias = 1;
             let proximoMesDia = 1;
 
@@ -461,17 +465,11 @@
                 const cell = document.createElement('div');
                 cell.className = 'cal-cell';
 
-                let diaFormatadoStr = '';
-                let anoCel = ano;
-                let mesCel = mes + 1;
-
                 if (i < primeiroDiaIndex) {
-                    // Dias do mês anterior
                     const diaAnt = ultimoDiaMesAnterior - (primeiroDiaIndex - 1 - i);
                     cell.classList.add('other-month');
                     cell.innerHTML = `<div class="cell-number">${diaAnt}</div><div class="cell-events"></div>`;
                 } else if (contadorDias <= ultimoDiaMes) {
-                    // Dias do mês atual
                     const diaNum = contadorDias;
                     if (ano === anoAtual && mes === mesAtual && diaNum === diaAtual) {
                         cell.classList.add('today');
@@ -479,12 +477,11 @@
                     
                     const mStr = String(mes + 1).padStart(2, '0');
                     const dStr = String(diaNum).padStart(2, '0');
-                    diaFormatadoStr = `${ano}-${mStr}-${dStr}`;
+                    const diaFormatadoStr = `${ano}-${mStr}-${dStr}`;
 
                     cell.innerHTML = `<div class="cell-number">${diaNum}</div><div class="cell-events" id="day-cell-${diaFormatadoStr}"></div>`;
                     contadorDias++;
                 } else {
-                    // Dias do próximo mês
                     cell.classList.add('other-month');
                     cell.innerHTML = `<div class="cell-number">${proximoMesDia}</div><div class="cell-events"></div>`;
                     proximoMesDia++;
@@ -493,7 +490,6 @@
                 grid.appendChild(cell);
             }
 
-            // Insere os eventos nas caixas correspondentes do mês ativo
             appEvents.forEach(ev => {
                 const cellEventsContainer = document.getElementById(`day-cell-${ev.dateStr}`);
                 if (cellEventsContainer) {
