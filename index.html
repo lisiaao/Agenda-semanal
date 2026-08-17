@@ -24,8 +24,16 @@
             justify-content: center; align-items: center; z-index: 9999; color: white;
             transition: opacity 0.6s ease-out; text-align: center; padding: 20px;
         }
-        #welcome-logo { max-height: 180px; border-radius: 12px; margin-bottom: 20px; display: none; object-fit: contain; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        #welcome-name { font-size: 2.5rem; margin-bottom: 30px; font-weight: bold; }
+        #welcome-logo {
+            max-height: 280px; /* Logo bem maior na tela inicial */
+            max-width: 80vw;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: none;
+            object-fit: contain;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        #welcome-name { font-size: 2.5rem; margin-bottom: 30px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .btn-start {
             background-color: white; color: var(--primary-color); border: none;
             padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 30px;
@@ -149,9 +157,7 @@
 
             <!-- Visão de Calendário -->
             <div id="calendar-view" class="view-container">
-                <div class="calendar-grid" id="calendar-grid-container">
-                    <!-- Gerado via JS -->
-                </div>
+                <div class="calendar-grid" id="calendar-grid-container"></div>
             </div>
 
             <!-- Visão de Aniversariantes -->
@@ -161,8 +167,6 @@
             </div>
         </main>
     </div>
-
-    <!-- Modais omitidos para poupar espaço, mantendo a estrutura padrão abaixo -->
 
     <!-- Modal de Configurações -->
     <div id="settings-modal" class="modal-overlay">
@@ -222,7 +226,6 @@
     </div>
 
     <script>
-        // Dados Padrão Iniciais
         const defaultSettings = { name: "Minha Igreja", logo: "", primaryColor: "#2c3e50", secondaryColor: "#34495e", bgColor: "#f5f6fa", textColor: "#333333" };
         let appSettings = JSON.parse(localStorage.getItem('agendaSettings')) || defaultSettings;
         let appEvents = JSON.parse(localStorage.getItem('agendaEvents')) || [];
@@ -231,7 +234,6 @@
         const mesesNomes = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
         const diasSemana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
 
-        // Inicializa estilos na tela de boas-vindas imediatamente
         applySettingsToUI();
 
         function startApp() {
@@ -250,11 +252,9 @@
             document.documentElement.style.setProperty('--bg-color', appSettings.bgColor);
             document.documentElement.style.setProperty('--text-color', appSettings.textColor);
             
-            // Textos
             document.getElementById('display-name').innerText = appSettings.name;
             document.getElementById('welcome-name').innerText = appSettings.name;
             
-            // Logos
             const logoEl = document.getElementById('display-logo');
             const welcomeLogoEl = document.getElementById('welcome-logo');
             
@@ -265,7 +265,6 @@
                 logoEl.style.display = 'none'; welcomeLogoEl.style.display = 'none';
             }
 
-            // Popula Formulário
             document.getElementById('set-name').value = appSettings.name;
             document.getElementById('set-logo').value = appSettings.logo;
             document.getElementById('set-color-1').value = appSettings.primaryColor;
@@ -288,7 +287,6 @@
             closeModal('settings-modal');
         }
 
-        // --- Gerenciamento de Datas e Eventos ---
         function formatarData(dataISO) {
             if(!dataISO) return "";
             const [ano, mes, dia] = dataISO.split('-');
@@ -305,7 +303,7 @@
             const newEvent = {
                 id: Date.now(),
                 title: document.getElementById('ev-title').value,
-                dateStr: rawDate, // YYYY-MM-DD
+                dateStr: rawDate,
                 formattedDate: formatarData(rawDate),
                 time: document.getElementById('ev-time').value,
                 desc: document.getElementById('ev-desc').value,
@@ -314,7 +312,6 @@
             };
 
             appEvents.push(newEvent);
-            // Ordena primeiro por data, depois por horário
             appEvents.sort((a, b) => {
                 if (a.dateStr === b.dateStr) return a.time.localeCompare(b.time);
                 return a.dateStr.localeCompare(b.dateStr);
@@ -354,21 +351,17 @@
                 return;
             }
 
-            // Agrupa por data formatada
             const eventsByDate = {};
             appEvents.forEach(ev => {
                 if(!eventsByDate[ev.formattedDate]) eventsByDate[ev.formattedDate] = [];
                 eventsByDate[ev.formattedDate].push(ev);
             });
 
-            // Renderiza Lista e Calendário dinamicamente
             Object.keys(eventsByDate).forEach(dateGroup => {
-                // Para a Lista
                 const dateLabel = document.createElement('h2');
                 dateLabel.className = 'date-header'; dateLabel.innerText = dateGroup;
                 listContainer.appendChild(dateLabel);
 
-                // Para o Calendário (cria coluna para o dia)
                 const col = document.createElement('div');
                 col.className = 'day-column';
                 col.innerHTML = `<div class="day-header">${dateGroup}</div><div class="day-content"></div>`;
@@ -378,7 +371,6 @@
                     const statusClass = ev.status === 'passed' ? 'status-passed' : (ev.status === 'canceled' ? 'status-canceled' : '');
                     const canceledBadge = ev.status === 'canceled' ? '<span class="badge-canceled">CANCELADO</span>' : '';
                     
-                    // Card da Lista
                     const card = document.createElement('div');
                     card.className = `event-card ${statusClass}`;
                     card.innerHTML = `
@@ -400,7 +392,6 @@
                     `;
                     listContainer.appendChild(card);
 
-                    // Card do Calendário
                     const calCard = document.createElement('div');
                     calCard.className = `cal-event ${statusClass}`;
                     calCard.innerHTML = `
@@ -413,7 +404,6 @@
             });
         }
 
-        // --- Gerenciamento de Aniversariantes ---
         function saveBirthday() {
             const name = document.getElementById('bday-name').value;
             const day = parseInt(document.getElementById('bday-day').value);
@@ -444,14 +434,12 @@
                 container.innerHTML = '<p style="text-align:center; padding: 20px;">Nenhum aniversariante cadastrado.</p>'; return;
             }
 
-            // Agrupa por Mês e ordena por dia
             const bdaysByMonth = {};
             appBirthdays.sort((a, b) => a.day - b.day).forEach(b => {
                 if(!bdaysByMonth[b.month]) bdaysByMonth[b.month] = [];
                 bdaysByMonth[b.month].push(b);
             });
 
-            // Ordena os meses renderizados de 1 a 12
             Object.keys(bdaysByMonth).sort((a,b) => a - b).forEach(monthNum => {
                 const monthName = mesesNomes[monthNum - 1];
                 container.innerHTML += `<h3 class="bday-month-header">${monthName}</h3>`;
@@ -469,12 +457,10 @@
             });
         }
 
-        // --- Controles de Navegação e Modais ---
         function changeMainView(viewId) {
             document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId + '-view').classList.add('active');
             
-            // Estilo dos botões
             document.querySelectorAll('.controls button').forEach(b => b.classList.remove('btn-nav-active'));
             if(viewId === 'list') document.getElementById('btn-view-list').classList.add('btn-nav-active');
             if(viewId === 'calendar') document.getElementById('btn-view-cal').classList.add('btn-nav-active');
