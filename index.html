@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+   <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -64,12 +64,14 @@
         .view-container.active { display: block; animation: fadeIn 0.4s; }
 
         /* Estilo da Lista de Eventos */
-        .date-header { color: var(--primary-color); margin: 25px 0 10px 0; font-size: 1.4rem; border-bottom: 2px solid var(--secondary-color); padding-bottom: 5px;}
+        .date-header { margin: 25px 0 15px 0; border-bottom: 2px solid var(--secondary-color); padding-bottom: 5px; display: flex; align-items: baseline; gap: 10px;}
+        .date-header .weekday { color: var(--primary-color); font-size: 1.6rem; text-transform: capitalize; }
+        .date-header .fulldate { color: #7f8c8d; font-size: 1rem; font-weight: normal; }
         .event-list { display: flex; flex-direction: column; gap: 15px; }
         
         .event-card {
             background: white; padding: 20px; border-left: 5px solid var(--secondary-color);
-            border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 10px;
+            border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;
         }
         .event-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .event-details h3 { color: var(--primary-color); margin-bottom: 5px; font-size: 1.3rem; }
@@ -111,19 +113,30 @@
         .cell-number { font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; }
         .cell-events { width: 100%; display: flex; flex-direction: column; gap: 3px; }
         .cell-event-item {
-            background: var(--primary-color); color: white; font-size: 0.7rem; padding: 2px 5px;
+            background: var(--primary-color); color: white; font-size: 0.7rem; padding: 3px 5px;
             border-radius: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
         }
         .cell-event-item.canceled { background: #e74c3c; text-decoration: line-through; }
         .cell-event-item.passed { background: #95a5a6; }
+        .cell-event-item.bday { background: #f39c12; color: #fff; font-weight: bold; border-left: 2px solid #e67e22;}
 
         /* --- Aniversariantes --- */
-        .bday-month-header { background: var(--secondary-color); color: white; padding: 10px; border-radius: 6px; margin: 20px 0 10px 0; }
-        .bday-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
-        .bday-card { background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #f1c40f; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;}
-        .bday-info strong { display: block; font-size: 1.1rem; color: var(--primary-color); }
-        .bday-info span { color: #666; font-size: 0.9rem; }
+        .bday-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 15px;}
+        .month-block { background: white; border-radius: 10px; padding: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #eee; }
+        .month-block h3 { background: var(--secondary-color); color: white; padding: 12px 15px; margin: 0; font-size: 1.2rem; text-align: center; text-transform: uppercase; letter-spacing: 1px;}
+        .month-bdays-list { list-style: none; padding: 0; margin: 0; }
+        .month-bdays-list li { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #f5f6fa; }
+        .month-bdays-list li:last-child { border-bottom: none; }
+        .bday-day-badge { background: #f39c12; color: white; font-weight: bold; padding: 4px 8px; border-radius: 4px; margin-right: 10px; min-width: 35px; text-align: center; display: inline-block;}
+        .bday-name-text { flex-grow: 1; font-weight: bold; color: var(--primary-color); font-size: 1.05rem;}
         .btn-add-bday { background: #f39c12 !important; margin-bottom: 15px; }
+
+        /* --- Cartazes --- */
+        .posters-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
+        .poster-card { background: white; border-radius: 10px; padding: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+        .poster-card img { width: 100%; height: 300px; object-fit: cover; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee;}
+        .poster-card h3 { color: var(--primary-color); font-size: 1.1rem; margin-bottom: 10px; text-align: center;}
+        .btn-add-poster { background: #8e44ad !important; }
 
         /* --- Modais --- */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
@@ -164,7 +177,8 @@
             <div class="controls">
                 <button id="btn-view-list" class="btn-nav-active" onclick="changeMainView('list')">📄 Lista</button>
                 <button id="btn-view-cal" onclick="changeMainView('calendar')">📅 Calendário</button>
-                <button id="btn-view-bday" onclick="changeMainView('birthdays')">🎂 Aniversariantes</button>
+                <button id="btn-view-bday" onclick="changeMainView('birthdays')">🎂 Aniversários</button>
+                <button id="btn-view-posters" onclick="changeMainView('posters')">🖼️ Cartazes</button>
                 <button onclick="openModal('settings-modal')">⚙️ Ajustes</button>
             </div>
         </header>
@@ -194,7 +208,13 @@
             <!-- Visão de Aniversariantes -->
             <div id="birthdays-view" class="view-container">
                 <button class="controls btn-save btn-add-bday" onclick="openModal('bday-modal')">+ Cadastrar Aniversariante</button>
-                <div id="birthdays-container"></div>
+                <div id="birthdays-container" class="bday-grid"></div>
+            </div>
+
+            <!-- Visão de Cartazes -->
+            <div id="posters-view" class="view-container">
+                <button class="controls btn-save btn-add-poster" onclick="openModal('poster-modal')">+ Importar Novo Cartaz</button>
+                <div id="posters-container" class="posters-grid"></div>
             </div>
         </main>
     </div>
@@ -226,7 +246,7 @@
             <div class="form-group"><label>Data</label><input type="date" id="ev-date"></div>
             <div class="form-group"><label>Horário</label><input type="time" id="ev-time"></div>
             <div class="form-group"><label>Descrição</label><textarea id="ev-desc" rows="2"></textarea></div>
-            <div class="form-group"><label>URL do Cartaz/Foto</label><input type="text" id="ev-image"></div>
+            <div class="form-group"><label>URL do Cartaz/Foto (Opcional)</label><input type="text" id="ev-image" placeholder="Cole o link da imagem"></div>
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeModal('event-modal')">Cancelar</button>
                 <button class="btn-save" onclick="saveEvent()">Salvar Evento</button>
@@ -256,11 +276,37 @@
         </div>
     </div>
 
+    <!-- Modal de Novo Cartaz -->
+    <div id="poster-modal" class="modal-overlay">
+        <div class="modal">
+            <h2>Importar Cartaz</h2>
+            <div class="form-group"><label>Nome do Evento/Culto</label><input type="text" id="poster-title" placeholder="Ex: Culto de Jovens"></div>
+            
+            <div class="form-group">
+                <label>Carregar imagem do seu celular/PC</label>
+                <input type="file" id="poster-file" accept="image/*">
+            </div>
+            
+            <div style="text-align: center; margin: 10px 0;"><strong>OU</strong></div>
+
+            <div class="form-group">
+                <label>URL da Imagem (Link da Internet)</label>
+                <input type="text" id="poster-url" placeholder="https://...">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('poster-modal')">Cancelar</button>
+                <button class="btn-save" onclick="savePoster()">Salvar Cartaz</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const defaultSettings = { name: "Minha Igreja", logo: "", primaryColor: "#2c3e50", secondaryColor: "#34495e", bgColor: "#f5f6fa", textColor: "#333333" };
         let appSettings = JSON.parse(localStorage.getItem('agendaSettings')) || defaultSettings;
         let appEvents = JSON.parse(localStorage.getItem('agendaEvents')) || [];
         let appBirthdays = JSON.parse(localStorage.getItem('agendaBirthdays')) || [];
+        let appPosters = JSON.parse(localStorage.getItem('agendaPosters')) || [];
         
         const mesesNomes = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
         const diasSemana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
@@ -281,6 +327,7 @@
                 renderEvents();
                 renderCalendar();
                 renderBirthdays();
+                renderPosters();
             }, 600);
         }
 
@@ -328,11 +375,15 @@
             closeModal('settings-modal');
         }
 
-        function formatarData(dataISO) {
-            if(!dataISO) return "";
+        // Função separada para pegar só o dia da semana e data completa
+        function extrairDataParaLista(dataISO) {
+            if(!dataISO) return { weekday: "", fulldate: "" };
             const [ano, mes, dia] = dataISO.split('-');
             const dataObj = new Date(ano, mes - 1, dia);
-            return `${diasSemana[dataObj.getDay()]}, ${dia}/${mes}/${ano}`;
+            return {
+                weekday: diasSemana[dataObj.getDay()],
+                fulldate: `${dia}/${mes}/${ano}`
+            };
         }
 
         function saveEvent() {
@@ -345,7 +396,6 @@
                 id: Date.now(),
                 title: document.getElementById('ev-title').value,
                 dateStr: rawDate,
-                formattedDate: formatarData(rawDate),
                 time: document.getElementById('ev-time').value,
                 desc: document.getElementById('ev-desc').value,
                 image: document.getElementById('ev-image').value,
@@ -395,13 +445,18 @@
 
             const eventsByDate = {};
             appEvents.forEach(ev => {
-                if(!eventsByDate[ev.formattedDate]) eventsByDate[ev.formattedDate] = [];
-                eventsByDate[ev.formattedDate].push(ev);
+                if(!eventsByDate[ev.dateStr]) eventsByDate[ev.dateStr] = [];
+                eventsByDate[ev.dateStr].push(ev);
             });
 
-            Object.keys(eventsByDate).forEach(dateGroup => {
+            // Ordena as datas para exibir em ordem
+            Object.keys(eventsByDate).sort().forEach(dateGroup => {
+                const dataFormatada = extrairDataParaLista(dateGroup);
+
                 const dateLabel = document.createElement('h2');
-                dateLabel.className = 'date-header'; dateLabel.innerText = dateGroup;
+                dateLabel.className = 'date-header'; 
+                // Exibe "Terça-feira 25/10/2023" usando o CSS e HTML
+                dateLabel.innerHTML = `<span class="weekday">${dataFormatada.weekday}</span> <span class="fulldate">${dataFormatada.fulldate}</span>`;
                 listContainer.appendChild(dateLabel);
 
                 eventsByDate[dateGroup].forEach(ev => {
@@ -490,6 +545,7 @@
                 grid.appendChild(cell);
             }
 
+            // Popula os eventos no calendário
             appEvents.forEach(ev => {
                 const cellEventsContainer = document.getElementById(`day-cell-${ev.dateStr}`);
                 if (cellEventsContainer) {
@@ -498,6 +554,25 @@
                     item.innerText = `${ev.time} ${ev.title}`;
                     item.title = `${ev.time} - ${ev.title}`;
                     cellEventsContainer.appendChild(item);
+                }
+            });
+
+            // Popula os aniversariantes no calendário
+            appBirthdays.forEach(b => {
+                // b.month é de 1 a 12. No Javascript, 'mes' é de 0 a 11.
+                if (b.month === (mes + 1)) {
+                    const mStr = String(b.month).padStart(2, '0');
+                    const dStr = String(b.day).padStart(2, '0');
+                    const diaFormatadoStr = `${ano}-${mStr}-${dStr}`;
+
+                    const cellEventsContainer = document.getElementById(`day-cell-${diaFormatadoStr}`);
+                    if (cellEventsContainer) {
+                        const item = document.createElement('div');
+                        item.className = 'cell-event-item bday';
+                        item.innerHTML = `🎂 ${b.name}`;
+                        item.title = `Aniversário de ${b.name}`;
+                        cellEventsContainer.appendChild(item);
+                    }
                 }
             });
         }
@@ -513,7 +588,9 @@
             localStorage.setItem('agendaBirthdays', JSON.stringify(appBirthdays));
             
             document.getElementById('bday-name').value = ''; document.getElementById('bday-day').value = '';
-            closeModal('bday-modal'); renderBirthdays();
+            closeModal('bday-modal'); 
+            renderBirthdays();
+            renderCalendar(); // Atualiza calendário para mostrar o aniversariante recém criado
         }
 
         function deleteBirthday(id) {
@@ -521,6 +598,7 @@
                 appBirthdays = appBirthdays.filter(b => b.id !== id);
                 localStorage.setItem('agendaBirthdays', JSON.stringify(appBirthdays));
                 renderBirthdays();
+                renderCalendar(); // Atualiza calendário também
             }
         }
 
@@ -529,7 +607,7 @@
             container.innerHTML = '';
 
             if(appBirthdays.length === 0) {
-                container.innerHTML = '<p style="text-align:center; padding: 20px;">Nenhum aniversariante cadastrado.</p>'; return;
+                container.innerHTML = '<p style="grid-column: 1 / -1; text-align:center; padding: 20px;">Nenhum aniversariante cadastrado.</p>'; return;
             }
 
             const bdaysByMonth = {};
@@ -538,20 +616,102 @@
                 bdaysByMonth[b.month].push(b);
             });
 
+            // Renderiza no formato de bloquinhos
             Object.keys(bdaysByMonth).sort((a,b) => a - b).forEach(monthNum => {
                 const monthName = mesesNomes[monthNum - 1];
-                container.innerHTML += `<h3 class="bday-month-header">${monthName}</h3>`;
                 
-                const grid = document.createElement('div'); grid.className = 'bday-grid';
+                const block = document.createElement('div');
+                block.className = 'month-block';
+                
+                let listHTML = `<ul class="month-bdays-list">`;
                 bdaysByMonth[monthNum].forEach(b => {
-                    grid.innerHTML += `
-                        <div class="bday-card">
-                            <div class="bday-info"><strong>${b.name}</strong><span>Dia ${String(b.day).padStart(2, '0')}</span></div>
-                            <button class="delete-btn" style="padding: 5px 10px; font-size:12px;" onclick="deleteBirthday(${b.id})">X</button>
-                        </div>
+                    listHTML += `
+                        <li>
+                            <span class="bday-day-badge">${String(b.day).padStart(2, '0')}</span>
+                            <span class="bday-name-text">${b.name}</span>
+                            <button class="delete-btn" style="padding: 5px 8px; font-size:12px;" onclick="deleteBirthday(${b.id})">X</button>
+                        </li>
                     `;
                 });
-                container.appendChild(grid);
+                listHTML += `</ul>`;
+
+                block.innerHTML = `<h3>${monthName}</h3>${listHTML}`;
+                container.appendChild(block);
+            });
+        }
+
+        // Lógica de Cartazes
+        function savePoster() {
+            const title = document.getElementById('poster-title').value || 'Cartaz sem título';
+            const fileInput = document.getElementById('poster-file');
+            const urlInput = document.getElementById('poster-url').value;
+
+            // Se usuário mandou arquivo (foto do celular/PC)
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    adicionarCartazNaLista(title, e.target.result);
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } 
+            // Se usuário mandou um link da internet
+            else if (urlInput) {
+                adicionarCartazNaLista(title, urlInput);
+            } else {
+                alert("Por favor, selecione uma imagem do seu aparelho ou insira um link de imagem.");
+            }
+        }
+
+        function adicionarCartazNaLista(title, imageData) {
+            appPosters.push({
+                id: Date.now(),
+                title: title,
+                image: imageData
+            });
+
+            // Proteção limite de memória do localStorage
+            try {
+                localStorage.setItem('agendaPosters', JSON.stringify(appPosters));
+            } catch (e) {
+                alert("Erro: O arquivo é muito grande para salvar no armazenamento local do navegador. Tente enviar uma imagem menor ou use um Link (URL).");
+                appPosters.pop(); // Remove o último inserido que causou erro
+                return;
+            }
+
+            document.getElementById('poster-title').value = '';
+            document.getElementById('poster-file').value = '';
+            document.getElementById('poster-url').value = '';
+            closeModal('poster-modal');
+            renderPosters();
+        }
+
+        function deletePoster(id) {
+            if(confirm("Excluir este cartaz?")) {
+                appPosters = appPosters.filter(p => p.id !== id);
+                localStorage.setItem('agendaPosters', JSON.stringify(appPosters));
+                renderPosters();
+            }
+        }
+
+        function renderPosters() {
+            const container = document.getElementById('posters-container');
+            container.innerHTML = '';
+
+            if(appPosters.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1 / -1; text-align:center; padding: 20px;">Nenhum cartaz importado ainda.</p>'; 
+                return;
+            }
+
+            // Renderiza cartazes
+            appPosters.forEach(poster => {
+                const card = document.createElement('div');
+                card.className = 'poster-card';
+                card.innerHTML = `
+                    <h3>${poster.title}</h3>
+                    <img src="${poster.image}" alt="Cartaz ${poster.title}">
+                    <button class="delete-btn" onclick="deletePoster(${poster.id})">Excluir Cartaz</button>
+                `;
+                container.appendChild(card);
             });
         }
 
@@ -563,9 +723,10 @@
             if(viewId === 'list') document.getElementById('btn-view-list').classList.add('btn-nav-active');
             if(viewId === 'calendar') {
                 document.getElementById('btn-view-cal').classList.add('btn-nav-active');
-                renderCalendar();
+                renderCalendar(); // Força render para sempre estar atualizado
             }
             if(viewId === 'birthdays') document.getElementById('btn-view-bday').classList.add('btn-nav-active');
+            if(viewId === 'posters') document.getElementById('btn-view-posters').classList.add('btn-nav-active');
         }
 
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
