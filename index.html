@@ -64,8 +64,13 @@
         .view-container.active { display: block; animation: fadeIn 0.4s; }
 
         /* Estilo da Lista de Eventos */
-        .date-header { margin: 25px 0 15px 0; border-bottom: 2px solid var(--secondary-color); padding-bottom: 5px; display: flex; align-items: baseline; gap: 10px;}
-        .date-header .weekday { color: var(--primary-color); font-size: 1.6rem; text-transform: capitalize; }
+        .month-divider { 
+            color: #e67e22; font-size: 2.2rem; text-transform: uppercase; 
+            margin: 30px 0 10px 0; padding-bottom: 5px; 
+            border-bottom: 3px solid #e67e22; letter-spacing: 2px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .date-header { margin: 15px 0 15px 0; display: flex; align-items: baseline; gap: 10px;}
+        .date-header .weekday { color: var(--primary-color); font-size: 1.5rem; text-transform: capitalize; }
         .date-header .fulldate { color: #7f8c8d; font-size: 1rem; font-weight: normal; }
         .event-list { display: flex; flex-direction: column; gap: 15px; }
         
@@ -148,6 +153,25 @@
         .poster-card h3 { color: var(--primary-color); font-size: 1.1rem; margin-bottom: 10px; text-align: center;}
         .btn-add-poster { background: #8e44ad !important; }
 
+        /* --- Letreiro --- */
+        .letreiro-controls { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .letreiro-box {
+            width: 100%; height: 250px; background: black; border-radius: 8px; overflow: hidden; position: relative; display: flex; align-items: center; border: 3px solid var(--primary-color);
+        }
+        .let-scroll {
+            position: absolute; white-space: nowrap; font-size: 10vw; font-weight: bold; color: white;
+            will-change: transform, left; animation: scroll-left 15s linear infinite;
+        }
+        @keyframes scroll-left {
+            0% { left: 100%; transform: translateX(0); }
+            100% { left: 0; transform: translateX(-100%); }
+        }
+        /* Ajustes do letreiro em tela cheia */
+        .letreiro-box:fullscreen { height: 100vh; border-radius: 0; border: none; }
+        .letreiro-box:fullscreen .let-scroll { font-size: 25vw; }
+        .letreiro-box:-webkit-full-screen { height: 100vh; border-radius: 0; border: none; }
+        .letreiro-box:-webkit-full-screen .let-scroll { font-size: 25vw; }
+
         /* --- Modais --- */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000; }
         .modal { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
@@ -177,6 +201,7 @@
             .controls { justify-content: center; }
             .cal-cell { min-height: 80px; padding: 4px; }
             .image-viewer-close { top: -45px; right: 10px; }
+            .let-scroll { font-size: 20vw; } /* Fonte maior no celular */
         }
     </style>
 </head>
@@ -201,6 +226,7 @@
                 <button id="btn-view-cal" onclick="changeMainView('calendar')">📅 Calendário</button>
                 <button id="btn-view-bday" onclick="changeMainView('birthdays')">🎂 Aniversários</button>
                 <button id="btn-view-posters" onclick="changeMainView('posters')">🖼️ Cartazes</button>
+                <button id="btn-view-letreiro" onclick="changeMainView('letreiro')">🪧 Letreiro</button>
                 <button onclick="openModal('settings-modal')">⚙️ Ajustes</button>
             </div>
         </header>
@@ -212,7 +238,7 @@
                 <div id="events-list-container"></div>
             </div>
 
-            <!-- Visão de Calendário (Estilo Google Agenda) -->
+            <!-- Visão de Calendário -->
             <div id="calendar-view" class="view-container">
                 <div class="cal-nav-bar">
                     <button onclick="mudarMes(-1)">◀ Mês Anterior</button>
@@ -237,6 +263,45 @@
             <div id="posters-view" class="view-container">
                 <button class="controls btn-save btn-add-poster" onclick="openModal('poster-modal')">+ Importar Novo Cartaz</button>
                 <div id="posters-container" class="posters-grid"></div>
+            </div>
+
+            <!-- Visão de Letreiro -->
+            <div id="letreiro-view" class="view-container">
+                <div class="letreiro-controls">
+                    <div class="form-group">
+                        <label>Texto do Letreiro (Pode usar Emojis!)</label>
+                        <input type="text" id="let-text" value="Bem-vindos à nossa Igreja! 🙏✨" oninput="updateLetreiro()">
+                    </div>
+                    <div class="color-grid">
+                        <div class="form-group">
+                            <label>Cor do Texto</label>
+                            <input type="color" id="let-color" value="#ffffff" oninput="updateLetreiro()">
+                        </div>
+                        <div class="form-group">
+                            <label>Cor do Fundo</label>
+                            <input type="color" id="let-bg" value="#000000" oninput="updateLetreiro()">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Fonte da Letra</label>
+                        <select id="let-font" onchange="updateLetreiro()">
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="Impact, charcoal, sans-serif">Impact (Grossa)</option>
+                            <option value="'Courier New', Courier, monospace">Courier (Máquina de escrever)</option>
+                            <option value="'Times New Roman', Times, serif">Times New Roman</option>
+                            <option value="'Comic Sans MS', cursive, sans-serif">Comic Sans</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Velocidade da Rolagem</label>
+                        <input type="range" id="let-speed" min="10" max="100" value="50" oninput="updateLetreiro()">
+                    </div>
+                    <button class="btn-save" style="width: 100%; font-size: 1.1rem; padding: 15px;" onclick="fullscreenLetreiro()">🖥️ Abrir Letreiro em Tela Cheia</button>
+                </div>
+                
+                <div id="letreiro-display" class="letreiro-box">
+                    <div id="letreiro-text" class="let-scroll">Bem-vindos à nossa Igreja! 🙏✨</div>
+                </div>
             </div>
         </main>
     </div>
@@ -277,21 +342,17 @@
         </div>
     </div>
 
-    <!-- Modal de Visualizar Detalhes do Evento (Calendário Pop-up) -->
+    <!-- Modal de Visualizar Detalhes do Evento -->
     <div id="event-details-modal" class="modal-overlay">
         <div class="modal" style="text-align: left;">
             <h2 id="detail-title" style="color: var(--primary-color); margin-bottom: 10px;"></h2>
             <p style="margin-bottom: 5px;"><strong>📅 Data:</strong> <span id="detail-date"></span></p>
             <p style="margin-bottom: 5px;"><strong>🕒 Horário:</strong> <span id="detail-time"></span></p>
             <p style="margin-bottom: 15px;"><strong>📌 Status:</strong> <span id="detail-status"></span></p>
-            
             <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary-color);">
-                <strong>Descrição:</strong>
-                <p id="detail-desc" style="margin-top: 5px; color: #555;"></p>
+                <strong>Descrição:</strong><p id="detail-desc" style="margin-top: 5px; color: #555;"></p>
             </div>
-            
             <img id="detail-image" style="max-width: 100%; border-radius: 8px; margin-top: 15px; border: 1px solid #ddd; display: none;">
-            
             <div class="modal-actions" style="margin-top: 25px;">
                 <button class="btn-cancel" style="width: 100%; background-color: var(--primary-color);" onclick="closeModal('event-details-modal')">Fechar</button>
             </div>
@@ -325,15 +386,9 @@
         <div class="modal">
             <h2>Importar Cartaz</h2>
             <div class="form-group"><label>Nome do Evento/Culto</label><input type="text" id="poster-title" placeholder="Ex: Culto de Jovens"></div>
-            <div class="form-group">
-                <label>Carregar imagem do seu celular/PC</label>
-                <input type="file" id="poster-file" accept="image/*">
-            </div>
+            <div class="form-group"><label>Carregar imagem do seu celular/PC</label><input type="file" id="poster-file" accept="image/*"></div>
             <div style="text-align: center; margin: 10px 0;"><strong>OU</strong></div>
-            <div class="form-group">
-                <label>URL da Imagem (Link da Internet)</label>
-                <input type="text" id="poster-url" placeholder="https://...">
-            </div>
+            <div class="form-group"><label>URL da Imagem (Link da Internet)</label><input type="text" id="poster-url" placeholder="https://..."></div>
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeModal('poster-modal')">Cancelar</button>
                 <button class="btn-save" onclick="savePoster()">Salvar Cartaz</button>
@@ -341,7 +396,7 @@
         </div>
     </div>
 
-    <!-- Modal de Visualizar Cartaz em Tela Cheia (Lightbox) -->
+    <!-- Modal de Visualizar Cartaz em Tela Cheia -->
     <div id="viewer-modal" class="modal-overlay" onclick="closeModal('viewer-modal')">
         <div class="image-viewer-container" onclick="event.stopPropagation()">
             <button class="image-viewer-close" onclick="closeModal('viewer-modal')">&times;</button>
@@ -375,6 +430,7 @@
                 renderCalendar();
                 renderBirthdays();
                 renderPosters();
+                updateLetreiro();
             }, 600);
         }
 
@@ -432,10 +488,8 @@
             };
         }
 
-        // Abre o modal de evento para CRIAR, EDITAR ou DUPLICAR
         function openEventModal(id = null, mode = 'edit') {
             const modalTitle = document.getElementById('modal-event-title');
-            
             if (id) {
                 const ev = appEvents.find(e => e.id === id);
                 if(ev) {
@@ -444,9 +498,8 @@
                         document.getElementById('ev-id').value = ev.id;
                     } else if (mode === 'duplicate') {
                         modalTitle.innerText = "Duplicar Evento";
-                        document.getElementById('ev-id').value = ''; // ID vazio para criar uma nova cópia
+                        document.getElementById('ev-id').value = ''; 
                     }
-
                     document.getElementById('ev-title').value = ev.title;
                     document.getElementById('ev-date').value = ev.dateStr;
                     document.getElementById('ev-time').value = ev.time;
@@ -454,7 +507,6 @@
                     document.getElementById('ev-image').value = ev.image || '';
                 }
             } else {
-                // Modo Criação do Zero
                 modalTitle.innerText = "Adicionar Evento";
                 document.getElementById('ev-id').value = '';
                 document.querySelectorAll('#event-modal input:not([type="hidden"]), #event-modal textarea').forEach(el => el.value = '');
@@ -537,14 +589,32 @@
                 eventsByDate[ev.dateStr].push(ev);
             });
 
-            Object.keys(eventsByDate).sort().forEach(dateGroup => {
-                const dataFormatada = extrairDataParaLista(dateGroup);
+            let currentMonthYear = "";
 
+            Object.keys(eventsByDate).sort().forEach(dateGroup => {
+                
+                // LÓGICA DO DIVISOR DE MESES
+                const parts = dateGroup.split('-');
+                const anoStr = parts[0];
+                const mesIndex = parseInt(parts[1]) - 1;
+                const monthHeaderLabel = `${mesesNomes[mesIndex]} ${anoStr}`;
+                
+                if (currentMonthYear !== monthHeaderLabel) {
+                    const divMes = document.createElement('h1');
+                    divMes.className = 'month-divider';
+                    divMes.innerText = monthHeaderLabel;
+                    listContainer.appendChild(divMes);
+                    currentMonthYear = monthHeaderLabel;
+                }
+
+                // Renderiza a data (Dia da Semana)
+                const dataFormatada = extrairDataParaLista(dateGroup);
                 const dateLabel = document.createElement('h2');
                 dateLabel.className = 'date-header'; 
                 dateLabel.innerHTML = `<span class="weekday">${dataFormatada.weekday}</span> <span class="fulldate">${dataFormatada.fulldate}</span>`;
                 listContainer.appendChild(dateLabel);
 
+                // Renderiza os cartões dos eventos daquele dia
                 eventsByDate[dateGroup].forEach(ev => {
                     const statusClass = ev.status === 'passed' ? 'status-passed' : (ev.status === 'canceled' ? 'status-canceled' : '');
                     const canceledBadge = ev.status === 'canceled' ? '<span class="badge-canceled">CANCELADO</span>' : '';
@@ -575,13 +645,10 @@
             });
         }
 
-        // Função para mostrar os detalhes de um evento em um Pop-up
         function showEventDetails(id) {
             const ev = appEvents.find(e => e.id === id);
             if(!ev) return;
-            
             document.getElementById('detail-title').innerText = ev.title;
-            
             const dataFormatada = extrairDataParaLista(ev.dateStr);
             document.getElementById('detail-date').innerText = `${dataFormatada.weekday}, ${dataFormatada.fulldate}`;
             document.getElementById('detail-time').innerText = ev.time;
@@ -590,7 +657,6 @@
             if(ev.status === 'passed') statusText = "⚪ Já Passou";
             if(ev.status === 'canceled') statusText = "🔴 Cancelado";
             document.getElementById('detail-status').innerText = statusText;
-            
             document.getElementById('detail-desc').innerText = ev.desc ? ev.desc : "Nenhuma descrição informada para este evento.";
             
             const imgEl = document.getElementById('detail-image');
@@ -600,7 +666,6 @@
             } else {
                 imgEl.style.display = 'none';
             }
-            
             openModal('event-details-modal');
         }
 
@@ -617,13 +682,11 @@
 
             const ano = dataAtualCalendario.getFullYear();
             const mes = dataAtualCalendario.getMonth();
-
             title.innerText = `${mesesNomes[mes]} de ${ano}`;
 
             const primeiroDiaIndex = new Date(ano, mes, 1).getDay();
             const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
             const ultimoDiaMesAnterior = new Date(ano, mes, 0).getDate();
-
             const hoje = new Date();
             const anoAtual = hoje.getFullYear();
             const mesAtual = hoje.getMonth();
@@ -636,7 +699,6 @@
             for (let i = 0; i < totalCelulasGrid; i++) {
                 const cell = document.createElement('div');
                 cell.className = 'cal-cell';
-
                 if (i < primeiroDiaIndex) {
                     const diaAnt = ultimoDiaMesAnterior - (primeiroDiaIndex - 1 - i);
                     cell.classList.add('other-month');
@@ -646,11 +708,9 @@
                     if (ano === anoAtual && mes === mesAtual && diaNum === diaAtual) {
                         cell.classList.add('today');
                     }
-                    
                     const mStr = String(mes + 1).padStart(2, '0');
                     const dStr = String(diaNum).padStart(2, '0');
                     const diaFormatadoStr = `${ano}-${mStr}-${dStr}`;
-
                     cell.innerHTML = `<div class="cell-number">${diaNum}</div><div class="cell-events" id="day-cell-${diaFormatadoStr}"></div>`;
                     contadorDias++;
                 } else {
@@ -658,7 +718,6 @@
                     cell.innerHTML = `<div class="cell-number">${proximoMesDia}</div><div class="cell-events"></div>`;
                     proximoMesDia++;
                 }
-
                 grid.appendChild(cell);
             }
 
@@ -679,7 +738,6 @@
                     const mStr = String(b.month).padStart(2, '0');
                     const dStr = String(b.day).padStart(2, '0');
                     const diaFormatadoStr = `${ano}-${mStr}-${dStr}`;
-
                     const cellEventsContainer = document.getElementById(`day-cell-${diaFormatadoStr}`);
                     if (cellEventsContainer) {
                         const item = document.createElement('div');
@@ -696,59 +754,41 @@
             const name = document.getElementById('bday-name').value;
             const day = parseInt(document.getElementById('bday-day').value);
             const month = parseInt(document.getElementById('bday-month').value);
-
             if(!name || !day || !month || day < 1 || day > 31) { alert("Preencha os dados corretamente."); return; }
-
             appBirthdays.push({ id: Date.now(), name, day, month });
             localStorage.setItem('agendaBirthdays', JSON.stringify(appBirthdays));
-            
             document.getElementById('bday-name').value = ''; document.getElementById('bday-day').value = '';
-            closeModal('bday-modal'); 
-            renderBirthdays();
-            renderCalendar(); 
+            closeModal('bday-modal'); renderBirthdays(); renderCalendar(); 
         }
 
         function deleteBirthday(id) {
             if(confirm("Remover este aniversariante?")) {
                 appBirthdays = appBirthdays.filter(b => b.id !== id);
                 localStorage.setItem('agendaBirthdays', JSON.stringify(appBirthdays));
-                renderBirthdays();
-                renderCalendar(); 
+                renderBirthdays(); renderCalendar(); 
             }
         }
 
         function renderBirthdays() {
             const container = document.getElementById('birthdays-container');
             container.innerHTML = '';
-
             if(appBirthdays.length === 0) {
                 container.innerHTML = '<p style="grid-column: 1 / -1; text-align:center; padding: 20px;">Nenhum aniversariante cadastrado.</p>'; return;
             }
-
             const bdaysByMonth = {};
             appBirthdays.sort((a, b) => a.day - b.day).forEach(b => {
                 if(!bdaysByMonth[b.month]) bdaysByMonth[b.month] = [];
                 bdaysByMonth[b.month].push(b);
             });
-
             Object.keys(bdaysByMonth).sort((a,b) => a - b).forEach(monthNum => {
                 const monthName = mesesNomes[monthNum - 1];
-                
                 const block = document.createElement('div');
                 block.className = 'month-block';
-                
                 let listHTML = `<ul class="month-bdays-list">`;
                 bdaysByMonth[monthNum].forEach(b => {
-                    listHTML += `
-                        <li>
-                            <span class="bday-day-badge">${String(b.day).padStart(2, '0')}</span>
-                            <span class="bday-name-text">${b.name}</span>
-                            <button class="delete-btn" style="padding: 5px 8px; font-size:12px;" onclick="deleteBirthday(${b.id})">X</button>
-                        </li>
-                    `;
+                    listHTML += `<li><span class="bday-day-badge">${String(b.day).padStart(2, '0')}</span><span class="bday-name-text">${b.name}</span><button class="delete-btn" style="padding: 5px 8px; font-size:12px;" onclick="deleteBirthday(${b.id})">X</button></li>`;
                 });
                 listHTML += `</ul>`;
-
                 block.innerHTML = `<h3>${monthName}</h3>${listHTML}`;
                 container.appendChild(block);
             });
@@ -758,17 +798,14 @@
             const title = document.getElementById('poster-title').value || 'Cartaz sem título';
             const fileInput = document.getElementById('poster-file');
             const urlInput = document.getElementById('poster-url').value;
-
             if (fileInput.files && fileInput.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    adicionarCartazNaLista(title, e.target.result);
-                };
+                reader.onload = function(e) { adicionarCartazNaLista(title, e.target.result); };
                 reader.readAsDataURL(fileInput.files[0]);
             } else if (urlInput) {
                 adicionarCartazNaLista(title, urlInput);
             } else {
-                alert("Por favor, selecione uma imagem do seu aparelho ou insira um link de imagem.");
+                alert("Por favor, selecione uma imagem ou insira um link.");
             }
         }
 
@@ -777,15 +814,13 @@
             try {
                 localStorage.setItem('agendaPosters', JSON.stringify(appPosters));
             } catch (e) {
-                alert("Erro: O arquivo é muito grande para salvar no armazenamento local do navegador. Tente enviar uma imagem menor ou use um Link (URL).");
-                appPosters.pop(); 
-                return;
+                alert("Erro: Arquivo muito grande para salvar no navegador.");
+                appPosters.pop(); return;
             }
             document.getElementById('poster-title').value = '';
             document.getElementById('poster-file').value = '';
             document.getElementById('poster-url').value = '';
-            closeModal('poster-modal');
-            renderPosters();
+            closeModal('poster-modal'); renderPosters();
         }
 
         function deletePoster(id) {
@@ -796,7 +831,6 @@
             }
         }
 
-        // --- NOVA FUNÇÃO: Visualizar Cartaz em Tela Cheia ---
         function viewPosterFull(imageSrc) {
             document.getElementById('viewer-full-image').src = imageSrc;
             openModal('viewer-modal');
@@ -805,36 +839,61 @@
         function renderPosters() {
             const container = document.getElementById('posters-container');
             container.innerHTML = '';
-
             if(appPosters.length === 0) {
-                container.innerHTML = '<p style="grid-column: 1 / -1; text-align:center; padding: 20px;">Nenhum cartaz importado ainda.</p>'; 
-                return;
+                container.innerHTML = '<p style="grid-column: 1 / -1; text-align:center; padding: 20px;">Nenhum cartaz importado ainda.</p>'; return;
             }
-
             appPosters.forEach(poster => {
                 const card = document.createElement('div');
                 card.className = 'poster-card';
-                card.innerHTML = `
-                    <h3>${poster.title}</h3>
-                    <img src="${poster.image}" alt="Cartaz ${poster.title}" title="Clique para ampliar" onclick="viewPosterFull('${poster.image}')">
-                    <button class="delete-btn" onclick="deletePoster(${poster.id})">Excluir Cartaz</button>
-                `;
+                card.innerHTML = `<h3>${poster.title}</h3><img src="${poster.image}" alt="Cartaz ${poster.title}" title="Clique para ampliar" onclick="viewPosterFull('${poster.image}')"><button class="delete-btn" onclick="deletePoster(${poster.id})">Excluir Cartaz</button>`;
                 container.appendChild(card);
             });
+        }
+
+        // --- FUNÇÕES DO LETREIRO ---
+        function updateLetreiro() {
+            const text = document.getElementById('let-text').value;
+            const color = document.getElementById('let-color').value;
+            const bg = document.getElementById('let-bg').value;
+            const font = document.getElementById('let-font').value;
+            const speedSlider = document.getElementById('let-speed').value;
+            
+            const displayBox = document.getElementById('letreiro-display');
+            const textElement = document.getElementById('letreiro-text');
+            
+            textElement.innerText = text;
+            textElement.style.color = color;
+            textElement.style.fontFamily = font;
+            displayBox.style.backgroundColor = bg;
+            
+            // Lógica para transformar o valor da barra (10 a 100) em Segundos (duração da animação)
+            // Velocidade alta = duração baixa. Ex: slider 100 = 3 segundos, slider 10 = 30 segundos
+            const duration = 300 / parseInt(speedSlider);
+            textElement.style.animationDuration = duration + 's';
+        }
+
+        function fullscreenLetreiro() {
+            const elem = document.getElementById('letreiro-display');
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE/Edge */
+                elem.msRequestFullscreen();
+            }
         }
 
         function changeMainView(viewId) {
             document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId + '-view').classList.add('active');
-            
             document.querySelectorAll('.controls button').forEach(b => b.classList.remove('btn-nav-active'));
             if(viewId === 'list') document.getElementById('btn-view-list').classList.add('btn-nav-active');
             if(viewId === 'calendar') {
-                document.getElementById('btn-view-cal').classList.add('btn-nav-active');
-                renderCalendar(); 
+                document.getElementById('btn-view-cal').classList.add('btn-nav-active'); renderCalendar(); 
             }
             if(viewId === 'birthdays') document.getElementById('btn-view-bday').classList.add('btn-nav-active');
             if(viewId === 'posters') document.getElementById('btn-view-posters').classList.add('btn-nav-active');
+            if(viewId === 'letreiro') document.getElementById('btn-view-letreiro').classList.add('btn-nav-active');
         }
 
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
@@ -844,12 +903,10 @@
         document.querySelector('.btn-start').addEventListener('click', function() {
             const elem = document.documentElement;
             if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(err => console.log("Erro ao tentar tela cheia:", err));
-            } else if (elem.mozRequestFullScreen) { /* Firefox */
-                elem.mozRequestFullScreen();
-            } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari e Opera */
+                elem.requestFullscreen().catch(err => console.log("Erro tela cheia:", err));
+            } else if (elem.webkitRequestFullscreen) {
                 elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) { /* IE/Edge */
+            } else if (elem.msRequestFullscreen) {
                 elem.msRequestFullscreen();
             }
         });
