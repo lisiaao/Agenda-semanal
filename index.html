@@ -82,6 +82,7 @@
         .status-select { padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold; outline: none; cursor: pointer; }
         .delete-btn { background-color: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;}
         .edit-btn { background-color: #3498db; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;}
+        .duplicate-btn { background-color: #f39c12; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;}
 
         /* Status */
         .status-passed { opacity: 0.6; filter: grayscale(80%); border-left-color: #95a5a6; }
@@ -242,7 +243,7 @@
         </div>
     </div>
 
-    <!-- Modal de Novo/Editar Evento -->
+    <!-- Modal de Novo/Editar/Duplicar Evento -->
     <div id="event-modal" class="modal-overlay">
         <div class="modal">
             <h2 id="modal-event-title">Adicionar Evento</h2>
@@ -406,15 +407,21 @@
             };
         }
 
-        // Abre o modal de evento para CRIAR ou EDITAR
-        function openEventModal(id = null) {
+        // Abre o modal de evento para CRIAR, EDITAR ou DUPLICAR
+        function openEventModal(id = null, mode = 'edit') {
             const modalTitle = document.getElementById('modal-event-title');
+            
             if (id) {
-                // Modo Edição
                 const ev = appEvents.find(e => e.id === id);
                 if(ev) {
-                    modalTitle.innerText = "Editar Evento";
-                    document.getElementById('ev-id').value = ev.id;
+                    if (mode === 'edit') {
+                        modalTitle.innerText = "Editar Evento";
+                        document.getElementById('ev-id').value = ev.id;
+                    } else if (mode === 'duplicate') {
+                        modalTitle.innerText = "Duplicar Evento";
+                        document.getElementById('ev-id').value = ''; // ID vazio para criar uma nova cópia
+                    }
+
                     document.getElementById('ev-title').value = ev.title;
                     document.getElementById('ev-date').value = ev.dateStr;
                     document.getElementById('ev-time').value = ev.time;
@@ -422,7 +429,7 @@
                     document.getElementById('ev-image').value = ev.image || '';
                 }
             } else {
-                // Modo Criação
+                // Modo Criação do Zero
                 modalTitle.innerText = "Adicionar Evento";
                 document.getElementById('ev-id').value = '';
                 document.querySelectorAll('#event-modal input:not([type="hidden"]), #event-modal textarea').forEach(el => el.value = '');
@@ -449,7 +456,7 @@
                     appEvents[index].image = document.getElementById('ev-image').value;
                 }
             } else {
-                // Cria novo evento
+                // Cria novo evento (ou salva o evento duplicado)
                 const newEvent = {
                     id: Date.now(),
                     title: document.getElementById('ev-title').value,
@@ -535,7 +542,8 @@
                                 <option value="passed" ${ev.status === 'passed' ? 'selected' : ''}>⚪ Já Passou</option>
                                 <option value="canceled" ${ev.status === 'canceled' ? 'selected' : ''}>🔴 Cancelado</option>
                             </select>
-                            <button class="edit-btn" onclick="openEventModal(${ev.id})">Editar</button>
+                            <button class="duplicate-btn" onclick="openEventModal(${ev.id}, 'duplicate')">Duplicar</button>
+                            <button class="edit-btn" onclick="openEventModal(${ev.id}, 'edit')">Editar</button>
                             <button class="delete-btn" onclick="deleteEvent(${ev.id})">Excluir</button>
                         </div>
                     `;
@@ -638,7 +646,6 @@
                     item.className = `cell-event-item ${ev.status}`;
                     item.innerText = `${ev.time} ${ev.title}`;
                     item.title = "Clique para ver detalhes";
-                    // Adiciona a função de clicar no evento
                     item.onclick = function() { showEventDetails(ev.id); };
                     cellEventsContainer.appendChild(item);
                 }
