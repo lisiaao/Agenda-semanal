@@ -16,7 +16,7 @@
 
         body { background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
 
-        /* --- Tela de Boas-Vindas --- */
+        /* --- Tela de Boas-Vindas (Letreiro Inicial) --- */
         #welcome-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background-color: var(--primary-color); display: flex; flex-direction: column;
@@ -29,7 +29,7 @@
             display: none; object-fit: contain;
             box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
-        #welcome-name { font-size: 2.2rem; margin-bottom: 25px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        #welcome-name { font-size: 2.5rem; margin-bottom: 25px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .btn-start {
             background-color: white; color: var(--primary-color); border: none;
             padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 30px;
@@ -161,7 +161,7 @@
 </head>
 <body>
 
-    <!-- Tela de Boas-Vindas -->
+    <!-- Tela de Boas-Vindas (Letreiro Inicial) -->
     <div id="welcome-screen">
         <img id="welcome-logo" src="" alt="Logo">
         <h1 id="welcome-name">Minha Igreja</h1>
@@ -320,11 +320,23 @@
         const diasSemana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
 
         let dataAtualCalendario = new Date();
-        let currentPopupEventId = null; // Guarda o ID do evento aberto no pop-up
+        let currentPopupEventId = null;
 
         applySettingsToUI();
 
         function startApp() {
+            // Tenta colocar a página em tela cheia de forma segura
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => {
+                    console.log("Modo tela cheia impedido pelo navegador:", err);
+                });
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE/Edge */
+                elem.msRequestFullscreen();
+            }
+
             const welcomeScreen = document.getElementById('welcome-screen');
             const appMain = document.getElementById('app');
 
@@ -385,7 +397,6 @@
             return `${diasSemana[dataObj.getDay()]}, ${dia}/${mes}/${ano}`;
         }
 
-        // --- Gestão de Eventos ---
         function abrirModalCriarEvento() {
             document.getElementById('event-modal-title').innerText = "Adicionar Novo Evento";
             document.getElementById('ev-id').value = '';
@@ -427,7 +438,6 @@
             }
 
             if(id) {
-                // Editando existente
                 const index = appEvents.findIndex(e => e.id == id);
                 if(index !== -1) {
                     appEvents[index].title = title;
@@ -439,7 +449,6 @@
                     appEvents[index].image = image;
                 }
             } else {
-                // Criando novo
                 const newEvent = {
                     id: Date.now(),
                     title,
@@ -483,7 +492,6 @@
             }
         }
 
-        // --- Renderização Integrada (Calendário + Lista) ---
         function renderIntegratedAgenda() {
             renderCalendar();
             renderEventsList();
@@ -547,7 +555,6 @@
                 grid.appendChild(cell);
             }
 
-            // Inserir eventos nas células com suporte a cores e clique para o Pop-up
             appEvents.forEach(ev => {
                 const cellEventsContainer = document.getElementById(`day-cell-${ev.dateStr}`);
                 if (cellEventsContainer) {
@@ -556,12 +563,10 @@
                     item.innerText = `${ev.time} ${ev.title}`;
                     item.title = `${ev.time} - ${ev.title}`;
                     
-                    // Aplica a cor escolhida se estiver ativo
                     if(ev.status === 'active' && ev.color) {
                         item.style.backgroundColor = ev.color;
                     }
 
-                    // Clicar no evento abre o pop-up interativo
                     item.onclick = (e) => {
                         e.stopPropagation();
                         abrirPopupEvento(ev.id);
@@ -621,7 +626,6 @@
             });
         }
 
-        // --- Sistema de Pop-up do Calendário com Navegação ---
         function abrirPopupEvento(id) {
             currentPopupEventId = id;
             atualizarConteudoPopup();
@@ -652,8 +656,8 @@
             const index = appEvents.findIndex(e => e.id === currentPopupEventId);
             let novoIndex = index + direcao;
 
-            if(novoIndex < 0) novoIndex = appEvents.length - 1; // Volta para o último
-            if(novoIndex >= appEvents.length) novoIndex = 0; // Vai para o primeiro
+            if(novoIndex < 0) novoIndex = appEvents.length - 1;
+            if(novoIndex >= appEvents.length) novoIndex = 0;
 
             currentPopupEventId = appEvents[novoIndex].id;
             atualizarConteudoPopup();
@@ -675,7 +679,6 @@
             }
         }
 
-        // --- Aniversariantes ---
         function saveBirthday() {
             const name = document.getElementById('bday-name').value;
             const day = parseInt(document.getElementById('bday-day').value);
