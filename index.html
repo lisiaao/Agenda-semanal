@@ -103,10 +103,11 @@
         .event-details p { color: #666; font-size: 0.95rem; line-height: 1.4; }
         .event-image { max-width: 100%; max-height: 350px; object-fit: cover; border-radius: 8px; margin-top: 10px; border: 1px solid #eee; cursor: zoom-in; }
         
-        .event-actions { display: flex; gap: 10px; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; }
+        .event-actions { display: flex; gap: 10px; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; flex-wrap: wrap; }
         .status-select { padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold; outline: none; cursor: pointer; }
         .delete-btn { background-color: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;}
         .edit-btn { background-color: #3498db; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;}
+        .duplicate-btn { background-color: #f39c12; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;}
 
         /* Status */
         .status-passed { opacity: 0.6; filter: grayscale(80%); border-left-color: #95a5a6; }
@@ -146,7 +147,7 @@
         /* Popup de Detalhes do Evento */
         .popup-nav-buttons { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .popup-nav-buttons button { background: var(--secondary-color); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; transition: font-size 0.3s, padding 0.3s; }
-        #btn-toggle-maximize { background: #f39c12; font-weight: bold; }
+        #btn-toggle-maximize { background: #8e44ad; font-weight: bold; }
 
         /* Estilos do Modal Maximizado (Modo Projeção) */
         .modal.maximized {
@@ -165,10 +166,10 @@
         .modal.maximized .modal-actions button,
         .modal.maximized .modal-actions select { font-size: 1.2rem; padding: 12px 20px; }
 
-        /* Visualizador de Imagem Ampliada */
-        #image-viewer-modal { background: rgba(0,0,0,0.85); flex-direction: column; padding: 20px;}
+        /* Visualizador de Imagem Ampliada (Sempre por cima de tudo) */
+        #image-viewer-modal { background: rgba(0,0,0,0.9); flex-direction: column; padding: 20px; z-index: 10000; }
         #viewer-img { max-width: 95vw; max-height: 85vh; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); object-fit: contain; }
-        .close-viewer-btn { background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 20px;}
+        .close-viewer-btn { background: #e74c3c; color: white; border: none; padding: 10px 30px; border-radius: 30px; font-weight: bold; font-size: 1.2rem; cursor: pointer; margin-top: 20px;}
 
         @media (max-width: 768px) {
             header { flex-direction: column; text-align: center; }
@@ -264,7 +265,7 @@
         </div>
     </div>
 
-    <!-- Modal Novo / Editar Evento -->
+    <!-- Modal Novo / Editar / Duplicar Evento -->
     <div id="event-modal" class="modal-overlay">
         <div class="modal">
             <h2 id="event-modal-title">Adicionar Evento</h2>
@@ -282,12 +283,12 @@
         </div>
     </div>
 
-    <!-- Modal Pop-up do Evento (via Calendário) com botão de Projeção -->
+    <!-- Modal Pop-up do Evento (via Calendário) -->
     <div id="event-popup-modal" class="modal-overlay">
         <div class="modal">
             <div class="popup-nav-buttons">
                 <button onclick="navegarEventoPopup(-1)">◀ Anterior</button>
-                <button id="btn-toggle-maximize" onclick="toggleMaximizePopup()">🔍 Ampliar</button>
+                <button id="btn-toggle-maximize" onclick="toggleMaximizePopup()">🔍 Ampliar Pop-up</button>
                 <button onclick="navegarEventoPopup(1)">Próximo ▶</button>
             </div>
             <h2 id="popup-ev-title" style="color: var(--primary-color);">Título</h2>
@@ -304,7 +305,8 @@
                         <option value="canceled">🔴 Cancelado</option>
                     </select>
                 </div>
-                <div style="display: flex; gap: 8px;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="duplicate-btn" onclick="duplicarEventoAtualPopup()">Duplicar</button>
                     <button class="edit-btn" onclick="editarEventoAtualPopup()">Editar</button>
                     <button class="delete-btn" onclick="excluirEventoAtualPopup()">Excluir</button>
                     <button class="btn-cancel" onclick="closeModal('event-popup-modal')">Fechar</button>
@@ -348,10 +350,10 @@
         </div>
     </div>
 
-    <!-- Modal Visualizador de Imagem (Tela Cheia para fotos) -->
+    <!-- Modal Visualizador de Imagem (Tela Cheia para fotos/cartazes) -->
     <div id="image-viewer-modal" class="modal-overlay">
         <img id="viewer-img" src="" alt="Ampliado">
-        <button class="close-viewer-btn" onclick="closeModal('image-viewer-modal')">Fechar Imagem</button>
+        <button class="close-viewer-btn" onclick="closeModal('image-viewer-modal')">Fechar Cartaz</button>
     </div>
 
     <script>
@@ -366,7 +368,7 @@
 
         let dataAtualCalendario = new Date();
         let currentPopupEventId = null;
-        let isPopupMaximized = false; // Controle do Modo Projeção
+        let isPopupMaximized = false; 
 
         applySettingsToUI();
 
@@ -461,6 +463,22 @@
             document.getElementById('ev-id').value = ev.id;
             document.getElementById('ev-title').value = ev.title;
             document.getElementById('ev-date').value = ev.dateStr;
+            document.getElementById('ev-time').value = ev.time;
+            document.getElementById('ev-color').value = ev.color || '#2c3e50';
+            document.getElementById('ev-desc').value = ev.desc || '';
+            document.getElementById('ev-image').value = ev.image || '';
+            openModal('event-modal');
+        }
+
+        // Função de Duplicar
+        function duplicarEvento(id) {
+            const ev = appEvents.find(e => e.id === id);
+            if(!ev) return;
+            
+            document.getElementById('event-modal-title').innerText = "Duplicar Evento (Altere a Data)";
+            document.getElementById('ev-id').value = ''; // ID vazio para salvar como NOVO
+            document.getElementById('ev-title').value = ev.title;
+            document.getElementById('ev-date').value = ev.dateStr; // Mantém a data antiga para referência
             document.getElementById('ev-time').value = ev.time;
             document.getElementById('ev-color').value = ev.color || '#2c3e50';
             document.getElementById('ev-desc').value = ev.desc || '';
@@ -587,11 +605,17 @@
                     const card = document.createElement('div'); card.className = `event-card ${statusClass}`;
                     card.innerHTML = `
                         <div class="event-header"><div class="event-details"><h3>${ev.title} ${canceledBadge}</h3><p><strong>🕒 ${ev.time}</strong> ${ev.desc ? '- '+ev.desc : ''}</p></div></div>
-                        ${ev.image ? `<img src="${ev.image}" class="event-image" onclick="abrirVisualizadorImagem('${ev.image}')">` : ''}
+                        ${ev.image ? `
+                            <div style="margin-top: 10px;">
+                                <img src="${ev.image}" class="event-image" onclick="abrirVisualizadorImagem('${ev.image}')">
+                                <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">👆 Clique na imagem para ampliar</div>
+                            </div>
+                        ` : ''}
                         <div class="event-actions">
                             <select class="status-select" onchange="changeEventStatus(${ev.id}, this.value)">
                                 <option value="active" ${ev.status === 'active'?'selected':''}>🟢 Ativo</option><option value="passed" ${ev.status === 'passed'?'selected':''}>⚪ Já Passou</option><option value="canceled" ${ev.status === 'canceled'?'selected':''}>🔴 Cancelado</option>
                             </select>
+                            <button class="duplicate-btn" onclick="duplicarEvento(${ev.id})">Duplicar</button>
                             <button class="edit-btn" onclick="abrirModalEditarEvento(${ev.id})">Editar</button>
                             <button class="delete-btn" onclick="deleteEvent(${ev.id})">Excluir</button>
                         </div>
@@ -618,7 +642,10 @@
             
             const imgContainer = document.getElementById('popup-ev-image-container');
             if(ev.image) {
-                imgContainer.innerHTML = `<img src="${ev.image}" style="max-width:100%; object-fit:cover; cursor:zoom-in;" onclick="abrirVisualizadorImagem('${ev.image}')">`;
+                imgContainer.innerHTML = `
+                    <img src="${ev.image}" style="max-width:100%; max-height:250px; border-radius:6px; margin-top:10px; object-fit:cover; cursor:zoom-in;" onclick="abrirVisualizadorImagem('${ev.image}')">
+                    <div style="font-size: 0.85rem; color: #888; margin-top: 5px;">👆 Clique no cartaz para ver em tela cheia</div>
+                `;
             } else { imgContainer.innerHTML = ''; }
             document.getElementById('popup-ev-status').value = ev.status;
         }
@@ -641,16 +668,28 @@
             
             if(isPopupMaximized) {
                 modal.classList.add('maximized');
-                btn.innerText = "🔎 Reduzir";
+                btn.innerText = "🔎 Reduzir Pop-up";
             } else {
                 modal.classList.remove('maximized');
-                btn.innerText = "🔍 Ampliar";
+                btn.innerText = "🔍 Ampliar Pop-up";
             }
         }
 
         function mudarStatusPopup(novoStatus) { if(currentPopupEventId) changeEventStatus(currentPopupEventId, novoStatus); }
-        function editarEventoAtualPopup() { closeModal('event-popup-modal'); abrirModalEditarEvento(currentPopupEventId); }
-        function excluirEventoAtualPopup() { if(confirm("Tem certeza que deseja excluir?")) deleteEvent(currentPopupEventId); }
+        
+        function editarEventoAtualPopup() { 
+            closeModal('event-popup-modal'); 
+            abrirModalEditarEvento(currentPopupEventId); 
+        }
+        
+        function duplicarEventoAtualPopup() {
+            closeModal('event-popup-modal');
+            duplicarEvento(currentPopupEventId);
+        }
+
+        function excluirEventoAtualPopup() { 
+            if(confirm("Tem certeza que deseja excluir?")) deleteEvent(currentPopupEventId); 
+        }
 
         // --- Cartazes ---
         function savePoster() {
@@ -747,12 +786,13 @@
         
         function closeModal(id) { 
             document.getElementById(id).style.display = 'none'; 
-            // Se o popup for fechado, ele restaura automaticamente o tamanho padrão dele
+            
+            // Se o popup de evento for fechado, restaura o tamanho padrão
             if(id === 'event-popup-modal') {
                 const modal = document.querySelector('#event-popup-modal .modal');
                 modal.classList.remove('maximized');
                 isPopupMaximized = false;
-                document.getElementById('btn-toggle-maximize').innerText = "🔍 Ampliar";
+                document.getElementById('btn-toggle-maximize').innerText = "🔍 Ampliar Pop-up";
             }
         }
     </script>
