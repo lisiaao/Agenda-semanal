@@ -133,8 +133,8 @@
 
         /* --- Modais --- */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
-        .modal { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .modal h2 { margin-bottom: 20px; color: var(--primary-color); }
+        .modal { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); transition: all 0.3s ease; }
+        .modal h2 { margin-bottom: 20px; color: var(--primary-color); transition: font-size 0.3s; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
@@ -144,8 +144,26 @@
         .btn-save { background-color: var(--primary-color); color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;}
 
         /* Popup de Detalhes do Evento */
-        .popup-nav-buttons { display: flex; justify-content: space-between; margin-bottom: 15px; }
-        .popup-nav-buttons button { background: var(--secondary-color); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; }
+        .popup-nav-buttons { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .popup-nav-buttons button { background: var(--secondary-color); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; transition: font-size 0.3s, padding 0.3s; }
+        #btn-toggle-maximize { background: #f39c12; font-weight: bold; }
+
+        /* Estilos do Modal Maximizado (Modo Projeção) */
+        .modal.maximized {
+            width: 95vw !important;
+            max-width: 1400px !important;
+            height: 90vh !important;
+            max-height: 90vh !important;
+            padding: 40px !important;
+        }
+        .modal.maximized #popup-ev-title { font-size: 3.5rem; margin-bottom: 20px; }
+        .modal.maximized #popup-ev-date,
+        .modal.maximized #popup-ev-time { font-size: 2.2rem; margin-bottom: 15px; }
+        .modal.maximized #popup-ev-desc { font-size: 2.2rem; line-height: 1.4; margin-bottom: 25px; }
+        .modal.maximized #popup-ev-image-container img { max-height: 50vh; border-radius: 12px; }
+        .modal.maximized .popup-nav-buttons button { font-size: 1.3rem; padding: 12px 20px; }
+        .modal.maximized .modal-actions button,
+        .modal.maximized .modal-actions select { font-size: 1.2rem; padding: 12px 20px; }
 
         /* Visualizador de Imagem Ampliada */
         #image-viewer-modal { background: rgba(0,0,0,0.85); flex-direction: column; padding: 20px;}
@@ -162,7 +180,7 @@
 </head>
 <body>
 
-    <!-- Tela de Boas-Vindas -->
+    <!-- Tela de Boas-Vindas (Letreiro Inicial) -->
     <div id="welcome-screen">
         <img id="welcome-logo" src="" alt="Logo">
         <h1 id="welcome-name">Minha Igreja</h1>
@@ -264,11 +282,12 @@
         </div>
     </div>
 
-    <!-- Modal Pop-up do Evento (via Calendário) -->
+    <!-- Modal Pop-up do Evento (via Calendário) com botão de Projeção -->
     <div id="event-popup-modal" class="modal-overlay">
         <div class="modal">
             <div class="popup-nav-buttons">
                 <button onclick="navegarEventoPopup(-1)">◀ Anterior</button>
+                <button id="btn-toggle-maximize" onclick="toggleMaximizePopup()">🔍 Ampliar</button>
                 <button onclick="navegarEventoPopup(1)">Próximo ▶</button>
             </div>
             <h2 id="popup-ev-title" style="color: var(--primary-color);">Título</h2>
@@ -277,7 +296,7 @@
             <p id="popup-ev-desc" style="color: #666; margin-bottom: 15px;"></p>
             <div id="popup-ev-image-container"></div>
             
-            <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div>
                     <select class="status-select" id="popup-ev-status" onchange="mudarStatusPopup(this.value)">
                         <option value="active">🟢 Ativo</option>
@@ -347,6 +366,7 @@
 
         let dataAtualCalendario = new Date();
         let currentPopupEventId = null;
+        let isPopupMaximized = false; // Controle do Modo Projeção
 
         applySettingsToUI();
 
@@ -581,7 +601,12 @@
             });
         }
 
-        function abrirPopupEvento(id) { currentPopupEventId = id; atualizarConteudoPopup(); openModal('event-popup-modal'); }
+        // --- Lógica do Pop-up e Modo Projeção ---
+        function abrirPopupEvento(id) { 
+            currentPopupEventId = id; 
+            atualizarConteudoPopup(); 
+            openModal('event-popup-modal'); 
+        }
         
         function atualizarConteudoPopup() {
             const ev = appEvents.find(e => e.id === currentPopupEventId);
@@ -589,11 +614,11 @@
             document.getElementById('popup-ev-title').innerText = ev.title;
             document.getElementById('popup-ev-date').innerText = `📅 ${ev.formattedDate}`;
             document.getElementById('popup-ev-time').innerText = `🕒 Horário: ${ev.time}`;
-            document.getElementById('popup-ev-desc').innerText = ev.desc ? ev.desc : "Sem descrição.";
+            document.getElementById('popup-ev-desc').innerText = ev.desc ? ev.desc : "Sem descrição detalhada.";
             
             const imgContainer = document.getElementById('popup-ev-image-container');
             if(ev.image) {
-                imgContainer.innerHTML = `<img src="${ev.image}" style="max-width:100%; max-height:250px; border-radius:6px; margin-top:10px; object-fit:cover; cursor:zoom-in;" onclick="abrirVisualizadorImagem('${ev.image}')">`;
+                imgContainer.innerHTML = `<img src="${ev.image}" style="max-width:100%; object-fit:cover; cursor:zoom-in;" onclick="abrirVisualizadorImagem('${ev.image}')">`;
             } else { imgContainer.innerHTML = ''; }
             document.getElementById('popup-ev-status').value = ev.status;
         }
@@ -607,6 +632,22 @@
             currentPopupEventId = appEvents[novoIndex].id;
             atualizarConteudoPopup();
         }
+
+        // Modo de Projeção (Ampliar)
+        function toggleMaximizePopup() {
+            const modal = document.querySelector('#event-popup-modal .modal');
+            const btn = document.getElementById('btn-toggle-maximize');
+            isPopupMaximized = !isPopupMaximized;
+            
+            if(isPopupMaximized) {
+                modal.classList.add('maximized');
+                btn.innerText = "🔎 Reduzir";
+            } else {
+                modal.classList.remove('maximized');
+                btn.innerText = "🔍 Ampliar";
+            }
+        }
+
         function mudarStatusPopup(novoStatus) { if(currentPopupEventId) changeEventStatus(currentPopupEventId, novoStatus); }
         function editarEventoAtualPopup() { closeModal('event-popup-modal'); abrirModalEditarEvento(currentPopupEventId); }
         function excluirEventoAtualPopup() { if(confirm("Tem certeza que deseja excluir?")) deleteEvent(currentPopupEventId); }
@@ -700,8 +741,20 @@
             if(viewId === 'birthdays') document.getElementById('btn-view-bday').classList.add('btn-nav-active');
         }
 
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function openModal(id) { 
+            document.getElementById(id).style.display = 'flex'; 
+        }
+        
+        function closeModal(id) { 
+            document.getElementById(id).style.display = 'none'; 
+            // Se o popup for fechado, ele restaura automaticamente o tamanho padrão dele
+            if(id === 'event-popup-modal') {
+                const modal = document.querySelector('#event-popup-modal .modal');
+                modal.classList.remove('maximized');
+                isPopupMaximized = false;
+                document.getElementById('btn-toggle-maximize').innerText = "🔍 Ampliar";
+            }
+        }
     </script>
 </body>
 </html>
