@@ -283,7 +283,7 @@
         </div>
     </div>
 
-    <!-- Modal Pop-up do Evento (via Calendário) -->
+    <!-- Modal Pop-up do Evento (via Calendário) com botão de Projeção -->
     <div id="event-popup-modal" class="modal-overlay">
         <div class="modal">
             <div class="popup-nav-buttons">
@@ -470,15 +470,14 @@
             openModal('event-modal');
         }
 
-        // Função de Duplicar
         function duplicarEvento(id) {
             const ev = appEvents.find(e => e.id === id);
             if(!ev) return;
             
             document.getElementById('event-modal-title').innerText = "Duplicar Evento (Altere a Data)";
-            document.getElementById('ev-id').value = ''; // ID vazio para salvar como NOVO
+            document.getElementById('ev-id').value = ''; 
             document.getElementById('ev-title').value = ev.title;
-            document.getElementById('ev-date').value = ev.dateStr; // Mantém a data antiga para referência
+            document.getElementById('ev-date').value = ev.dateStr; 
             document.getElementById('ev-time').value = ev.time;
             document.getElementById('ev-color').value = ev.color || '#2c3e50';
             document.getElementById('ev-desc').value = ev.desc || '';
@@ -660,7 +659,6 @@
             atualizarConteudoPopup();
         }
 
-        // Modo de Projeção (Ampliar)
         function toggleMaximizePopup() {
             const modal = document.querySelector('#event-popup-modal .modal');
             const btn = document.getElementById('btn-toggle-maximize');
@@ -787,7 +785,6 @@
         function closeModal(id) { 
             document.getElementById(id).style.display = 'none'; 
             
-            // Se o popup de evento for fechado, restaura o tamanho padrão
             if(id === 'event-popup-modal') {
                 const modal = document.querySelector('#event-popup-modal .modal');
                 modal.classList.remove('maximized');
@@ -795,6 +792,29 @@
                 document.getElementById('btn-toggle-maximize').innerText = "🔍 Ampliar Pop-up";
             }
         }
+
+        // --- Atalhos de Teclado (Novo) ---
+        document.addEventListener('keydown', function(event) {
+            const popupModal = document.getElementById('event-popup-modal');
+            const imageViewerModal = document.getElementById('image-viewer-modal');
+
+            // 1. Prioridade para fechar visualizador de imagem com ESC
+            if (imageViewerModal.style.display === 'flex' && event.key === 'Escape') {
+                closeModal('image-viewer-modal');
+                return;
+            }
+
+            // 2. Navegação no Pop-up de Evento com Setas e ESC
+            if (popupModal.style.display === 'flex') {
+                if (event.key === 'ArrowRight') {
+                    navegarEventoPopup(1); // Setas direita -> Próximo
+                } else if (event.key === 'ArrowLeft') {
+                    navegarEventoPopup(-1); // Setas esquerda -> Anterior
+                } else if (event.key === 'Escape') {
+                    closeModal('event-popup-modal'); // ESC fecha o pop-up
+                }
+            }
+        });
     </script>
 </body>
 </html>
